@@ -1,3 +1,53 @@
+# SKRALOVNIK — personal film (v1)
+
+Anže's 8-second personal landing video (8 shots, 4K, 30 fps), rebuilt as a 10-second motion-design
+piece: Y2K chrome, hard black-and-white contrast, fine technical graphics and a tech-glitch edit,
+scored with SFX only (the camera sound is removed). It is built with the same tools as the Tessel
+film below: the picture in Remotion, the sound synthesized in Python, both reading one timeline.
+
+[![SKRALOVNIK film v1](video/skralovnik-v1-sheet.jpg)](video/skralovnik-v1.mp4)
+
+**Watch:** [`video/skralovnik-v1.mp4`](video/skralovnik-v1.mp4) (master, 1920×1080, 30 fps, AAC 320 kb/s) ·
+[`video/skralovnik-v1-web.mp4`](video/skralovnik-v1-web.mp4) (8 Mb/s, for the website).
+
+**The idea.** The day is a system being scanned by a chrome instrument. The eight chapters from the
+website (Present · Build · Train · Build · Run · Team · Recover · Repeat) keep their cuts, and each
+shot gets the same grammar: a transition hit on the cut, brackets that lock onto the subject
+(tracked with pose landmarks, the ring with optical flow), one- and two-frame interruptions
+(x-ray negative, a 4K punch-in, a 1-bit frame, the chapter word too big for the frame, a frame of
+real colour, a system frame), and one texture that travels (scan band, film strip, smear, contour,
+a wireframe globe set inside the pendant lamp). The brand sparkle is a real 3D chrome object: it
+wipes two cuts by swelling through the lens and, at the end, four of them lock into the SKRALOVNIK
+symbol above the wordmark from `logo.svg`. The only colour is the sauna's heat.
+
+**Sound.** Round 1 of an original SFX palette: three dry mechanical-digital prototypes (A SHUTTER,
+B LOCK, C GRAIN), no samples, no tonal beeps, sweeps, bells, drums or reverb. The cue sheet,
+audition reel, individual 48 kHz / 24-bit WAVs and QC (peaks, clean endings, mono compatibility)
+are in [`sfx/skralovnik/`](sfx/skralovnik/). Variations come after feedback on the prototypes.
+
+**Checks on every render** (`scripts/skralovnik/post.py`): audio sync to the sample, true peak after
+the AAC encode at or under −1 dBTP, and a flash scan (at most 2 full-frame luminance flashes in any
+second; WCAG 2.3.1 allows 3).
+
+```bash
+npm run skralovnik   # plates → timeline → 4K punch-ins → SFX → frames → grain + master + checks
+```
+
+Needs `ffmpeg` (with libx264) on the PATH and Python with
+`numpy scipy opencv-python-headless pillow soundfile pyloudnorm` (plus `mediapipe` only if
+`public/skralovnik/track.json` is deleted and tracking has to run again).
+
+```
+src/skralovnik/        timeline.ts (events → looks and cues), Film, Plate, Sys, Hud, Lock,
+                       Textures, Chrome (Three.js sparkle), Outro
+scripts/skralovnik/    prep.py (grade, dither, tracking, punch-ins), export-cues.ts, sfx.py,
+                       post.py, render.sh
+public/skralovnik/     source footage, logo / symbol / wordmark SVGs, track.json
+sfx/skralovnik/        SFX round 1 deliverables
+```
+
+---
+
 # Tessel — launch film
 
 A 33-second launch film for **Tessel**, a fictional product: *the calendar that plans itself.*

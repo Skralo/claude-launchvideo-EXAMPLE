@@ -1,0 +1,56 @@
+id,frame,timecode,t,fn,proto,gain_db,pan,chapter,look,note
+boot,0,00:00:00:00,0,texture,C GRAIN,-3.0,0,Boot,boot,"hairline frame draws in from the corners, brand line types on"
+boot-sys,4,00:00:00:04,0.1333,micro,A SHUTTER,-5.0,0,Boot,sys,system frame: the first tile of PRESENT
+boot-dit,5,00:00:00:05,0.1667,micro,A SHUTTER,-5.0,0,Boot,dit,1-bit frame of PRESENT
+p-in,6,00:00:00:06,0.2,transition,A SHUTTER,0.0,0,Present,neg,cut in on the x-ray negative
+p-lock,13,00:00:00:13,0.4333,lock,B LOCK,-2.0,0.01,Present,lock,brackets lock onto the face
+p-punch,17,00:00:00:17,0.5667,micro,A SHUTTER,-5.0,0.01,Present,punch,punch-in on the eyes
+p-band,22,00:00:00:22,0.7333,texture,C GRAIN,-3.0,0,Present,band,1-bit scan band sweeps down
+p-type,31,00:00:01:01,1.0333,micro,A SHUTTER,-5.0,0,Present,type,"PRESENT, too big for the frame"
+b1-in,36,00:00:01:06,1.2,transition,A SHUTTER,0.0,0,Build,slice,sliced glitch entry
+b1-lock,43,00:00:01:13,1.4333,lock,B LOCK,-2.0,0.11,Build,lock,brackets lock onto the ring
+b1-macro,47,00:00:01:17,1.5667,micro,A SHUTTER,-5.0,0.11,Build,punch,macro on the meander ring
+b1-strip,51,00:00:01:21,1.7,texture,C GRAIN,-3.0,0,Build,strip,film strip of the last frames rolls up the right edge
+b1-col,60,00:00:02:00,2,micro,A SHUTTER,-5.0,0,Build,col,one frame of real colour
+t-in,65,00:00:02:05,2.1667,transition,A SHUTTER,0.0,0,Train,wipe,chrome sparkle swells through the lens and wipes to TRAIN
+t-lock,73,00:00:02:13,2.4333,lock,B LOCK,-2.0,-0.25,Train,lock,brackets lock onto the head on the bar
+t-type,77,00:00:02:17,2.5667,micro,A SHUTTER,-5.0,0,Train,typeInv,TRAIN in ink on paper
+t-band,82,00:00:02:22,2.7333,texture,C GRAIN,-3.0,0,Train,bandV,1-bit scan band sweeps left to right
+t-dit,91,00:00:03:01,3.0333,micro,A SHUTTER,-5.0,0,Train,dit,one 1-bit frame
+b2-in,96,00:00:03:06,3.2,transition,A SHUTTER,0.0,0,Build,dit+block,"arrives as 1-bit, a paper block knocks it into place"
+b2-lock,103,00:00:03:13,3.4333,lock,B LOCK,-2.0,0.22,Build,lock,brackets lock onto the face over the notebook
+b2-sys,107,00:00:03:17,3.5667,micro,A SHUTTER,-5.0,0,Build,sys,system frame: both BUILD shots side by side
+b2-contour,112,00:00:03:22,3.7333,texture,C GRAIN,-3.0,0,Build,contour,the silhouette traces itself in hairline
+b2-neg,123,00:00:04:03,4.1,micro,A SHUTTER,-5.0,0,Build,neg,x-ray negative
+r-in,128,00:00:04:08,4.2667,transition,A SHUTTER,0.0,0,Run,sys+slice,"system strip, then a sliced entry"
+r-lock,134,00:00:04:14,4.4667,lock,B LOCK,-2.0,0.04,Run,lock,brackets lock onto the runner's head
+r-chrome,139,00:00:04:19,4.6333,micro,A SHUTTER,-5.0,0,Run,chrome,full-frame chrome sparkle
+r-smear,143,00:00:04:23,4.7667,texture,C GRAIN,-3.0,0,Run,smear,the stride smears into horizontal streaks
+r-type,153,00:00:05:03,5.1,micro,A SHUTTER,-5.0,0,Run,type,"RUN, too big for the frame"
+tm-in,159,00:00:05:09,5.3,transition,A SHUTTER,0.0,0,Team,neg+col,"negative, colour, then silver"
+tm-lock,166,00:00:05:16,5.5333,lock,B LOCK,-2.0,-0.48,Team,lock,brackets lock onto both of them
+tm-punch,170,00:00:05:20,5.6667,micro,A SHUTTER,-5.0,-0.48,Team,punch,punch-in on the table
+tm-globe,173,00:00:05:23,5.7667,texture,C GRAIN,-3.0,0,Team,globe,a wireframe globe turns inside the pendant lamp
+tm-sys,183,00:00:06:03,6.1,micro,A SHUTTER,-5.0,0,Team,sys,system frame: the team tile
+rc-in,188,00:00:06:08,6.2667,transition,A SHUTTER,0.0,0,Recover,black,"one frame of black, only the instruments"
+rc-lock,196,00:00:06:16,6.5333,lock,B LOCK,-2.0,0.12,Recover,lock,brackets lock onto the silhouette
+rc-col,200,00:00:06:20,6.6667,micro,A SHUTTER,-5.0,0,Recover,col,the sauna in full colour
+rc-band,204,00:00:06:24,6.8,texture,C GRAIN,-3.0,0,Recover,band,heat scan band rises
+rc-neg,216,00:00:07:06,7.2,micro,A SHUTTER,-5.0,0,Recover,neg,x-ray negative of the heat
+rp-in,221,00:00:07:11,7.3667,transition,A SHUTTER,0.0,0,Repeat,wipe,chrome sparkle wipes to REPEAT
+rp-lock,229,00:00:07:19,7.6333,lock,B LOCK,-2.0,0.1,Repeat,lock,brackets lock onto the lift as the camera pulls back
+rp-type,233,00:00:07:23,7.7667,micro,A SHUTTER,-5.0,0,Repeat,typeInv,REPEAT in ink on paper
+rp-strip,236,00:00:07:26,7.8667,texture,C GRAIN,-3.0,0,Repeat,strip,film strip rolls up the right edge
+rp-slice,245,00:00:08:05,8.1667,micro,A SHUTTER,-5.0,0,Repeat,slice,sliced glitch
+recap-1,248,00:00:08:08,8.2667,micro,A SHUTTER,-5.0,0,Outro,recap,contact sheet: PRESENT drops into the grid
+recap-2,249,00:00:08:09,8.3,micro,A SHUTTER,-5.0,0,Outro,recap,contact sheet: BUILD drops into the grid
+recap-3,250,00:00:08:10,8.3333,micro,A SHUTTER,-5.0,0,Outro,recap,contact sheet: TRAIN drops into the grid
+recap-4,251,00:00:08:11,8.3667,micro,A SHUTTER,-5.0,0,Outro,recap,contact sheet: BUILD drops into the grid
+recap-5,252,00:00:08:12,8.4,micro,A SHUTTER,-5.0,0,Outro,recap,contact sheet: RUN drops into the grid
+recap-6,253,00:00:08:13,8.4333,micro,A SHUTTER,-5.0,0,Outro,recap,contact sheet: TEAM drops into the grid
+recap-7,254,00:00:08:14,8.4667,micro,A SHUTTER,-5.0,0,Outro,recap,contact sheet: RECOVER drops into the grid
+recap-8,255,00:00:08:15,8.5,micro,A SHUTTER,-5.0,0,Outro,recap,contact sheet: REPEAT drops into the grid
+collapse,256,00:00:08:16,8.5333,texture,C GRAIN,-3.0,0,Outro,collapse,the grid folds into one point
+converge,262,00:00:08:22,8.7333,texture,C GRAIN,-3.0,0,Outro,converge,four chrome sparkles fly in from the corners
+lockup,276,00:00:09:06,9.2,resolve,B LOCK,2.0,0,Outro,lockup,the sparkles lock into the SKRALOVNIK symbol
+wordmark,280,00:00:09:10,9.3333,texture,C GRAIN,-3.0,0,Outro,wordmark,the wordmark resolves from 1-bit noise

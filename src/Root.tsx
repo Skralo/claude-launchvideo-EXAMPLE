@@ -11,6 +11,8 @@ import { Act6End } from './acts/Act6End';
 import { LogoLab } from './LogoLab';
 import { AppLab } from './AppLab';
 import { ACT, FPS, H, TOTAL, W } from './timeline';
+import { Film } from './skralovnik/Film';
+import * as SK from './skralovnik/timeline';
 
 const wrap = (C: React.FC) => () => (
   <FontGate>
@@ -20,6 +22,9 @@ const wrap = (C: React.FC) => () => (
 
 export const RemotionRoot: React.FC = () => (
   <>
+    {/* SKRALOVNIK personal film: footage + Y2K chrome / tech-glitch motion design (src/skralovnik). */}
+    <Composition id="Skralovnik" component={Film} durationInFrames={SK.TOTAL} fps={SK.FPS} width={SK.W} height={SK.H} />
+
     {/* The film. */}
     <Composition id="Launch" component={Launch} durationInFrames={TOTAL} fps={FPS} width={W} height={H} />
     {/* The film as sub-frames for the motion-blurred master (scripts/render.sh --blur averages them). */}
