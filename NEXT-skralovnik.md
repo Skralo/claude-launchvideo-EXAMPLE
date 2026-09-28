@@ -70,6 +70,8 @@ Iz v2 se ne odstrani nič, spremeni se samo to:
   - **tvoj logo**, bel in velik, kot rezultat scana;
   - takoj za njim **besede v krogu**, ki se vrtijo **okrog tebe, za tabo** (maska osebe iz MediaPipe, ti si čez krog).
 - **NUJNO:** vsi scani, tanke črte, krogi in oznake so **beli**, z mehkim temnim sijem, da se berejo tudi na svetlih kadrih.
+- **Čist kader v3:** 56 % (v2: 60 %). Po kadrih 55–62 %, razen 4. kadra (zvezek): **41 %**, ker ima zdaj logo + obroč besed + contour. Za vprašati: je 4. kader prenatrpan?
+- **Preverjanja v3:** sinhronizacija 0 vzorcev, true peak −1,01 dBTP, največ 1 blisk na sekundo (WCAG dovoli 3).
 - Element "network" (6.webp) je shranjen, a v v3 ni uporabljen, ker zanj ni bilo navodila.
 - **SFX:** zvoki so isti kot v krogu 2, spremenjen je samo plan za nove dogodke:
   - obroč in logo dobita dolg mehak grain;

@@ -45,7 +45,7 @@ the individual 48 kHz / 24-bit WAVs and QC (peaks, clean endings, mono compatibi
 
 **Checks on every render** (`scripts/skralovnik/post.py`): audio sync to the sample, true peak after
 the AAC encode at or under −1 dBTP, and a flash scan (at most 2 full-frame luminance flashes in any
-second; WCAG 2.3.1 allows 3).
+second; WCAG 2.3.1 allows 3; v3 peaks at 1).
 
 ```bash
 npm run skralovnik   # plates + elements → timeline → SFX → frames → grain + master + checks
