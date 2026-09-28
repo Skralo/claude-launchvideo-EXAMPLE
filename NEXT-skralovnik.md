@@ -9,7 +9,7 @@ Branchi:
 - `claude/skralovnik-v2`: v2 nespremenjen (video + elementi), kot si želel.
 - `claude/skralovnik-v3`: **v3** (`video/skralovnik-v3.mp4`, web `video/skralovnik-v3-web.mp4`) z vsemi novimi elementi (`public/skralovnik/elements/src/`).
 
-Naslednje: tvoj feedback na v3 (slika + SFX krog 2 v kontekstu) z obširno anketo.
+**v3 je potrjen (28. 9.)**, glej razdelek 4. Naslednje: izbira naslednjega koraka (razdelka 5 in 6).
 
 ## Kako sprašujem
 Ob vsakem začetku seje najprej vprašam s pop-up anketo. Vprašanja so obširna, vsako razložim po domače, pri vsakem odgovoru pa napišem, kaj bo spremenil.
@@ -79,18 +79,25 @@ Iz v2 se ne odstrani nič, spremeni se samo to:
   - meč dobi kratek mehak grain;
   - contour ostane tih.
 
-## 4. Če video zamenja hero na spletni strani (`Skralo/skralovnik`, branch `website-v1`)
+## 4. Feedback na v3 (28. 9.): vse deluje
+- **Savna:** orbitalni HUD kot scan + meč z zamikom: "deluje, pusti tako".
+- **4. kader:** logo + obroč besed + contour (41 % čist): "ne, pusti tako".
+- **Bela:** vse bele črte in elementi z mehko temno senco: "točno to, deluje". Bela ostane pravilo naprej.
+- **SFX krog 2 v kontekstu:** "deluje, gremo naprej". **Zvok je zaklenjen**; naprej le fine variacije, če bo treba.
+- Neuporabljen ostaja le element "network" (6.webp).
+
+## 5. Če video zamenja hero na spletni strani (`Skralo/skralovnik`, branch `website-v1`)
 - Stran že sama prekriva video z logom in poglavji (`CHAPTERS` v `main.js`). Video ju zdaj ima tudi v sliki, zato bi se podvajala.
   - Možnost a: na strani odstranim prekrivanje.
   - Možnost b: izrišem "clean" verzijo videa brez HUD-a in loga.
 - Časi rezov so zamaknjeni za +6 sličic (boot), film traja 10,1 s namesto 8 s. `CHAPTERS` je treba na novo izmeriti.
 - Nov poster (prva sličica je zdaj skoraj črna) in mobilna verzija 1280×720 (kot `hero-mobile.mp4`).
 
-## 5. Odprte možnosti (niso zahtevane)
+## 6. Odprte možnosti (niso zahtevane)
 - 9:16 verzija za IG/Reels (zdaj izbran samo 16:9).
 - 4K master (pipeline to podpira z `--scale=2`).
 
-## 6. Tehnično za novo sejo
+## 7. Tehnično za novo sejo
 Pipeline: `npm run skralovnik`
 
 Za zagon potrebuje:
