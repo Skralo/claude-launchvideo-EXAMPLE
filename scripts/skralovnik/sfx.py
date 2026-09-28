@@ -1,22 +1,28 @@
 #!/usr/bin/env python3
 """
-SKRALOVNIK film: SFX palette, round 1 (prototypes only).
+SKRALOVNIK film: SFX palette, round 2 (variations after feedback on round 1).
 
-Three dry mechanical-digital sounds, synthesized from noise, impulses and short modal clusters.
-No DAW, no samples, no tonal beeps, no pitch sweeps, no bells, no drums, no reverb.
+Round 1 (sfx/skralovnik/round1/) tested three dry mechanical-digital prototypes. Feedback:
+  A SHUTTER works, but repeats too often.
+  B LOCK works; wants more dynamics: metal, spring.
+  C GRAIN works.
+  Overall: slightly too many sounds, the same pattern repeating through the film is annoying;
+  every scene should have its own pattern that follows the picture; fewer sounds, mostly soft,
+  only a few strong ones.
 
-  A  SHUTTER  micro-cut, transition   leaf shutter: open and close transients, spring rattle
-  B  LOCK     object lock, resolve    focus servo: accelerating ratchet into a latch, a burst of bits
-  C  GRAIN    texture movement        scanner head: a cloud of crushed noise grains over a stepped bed
+So round 2 keeps the three characters and builds families around them:
+  A  SHUTTER  six variants (heavy, two mid, three soft), never the same one twice in a row
+  B  LOCK     soft / mid / strong; metal latch with a spring rattle, bigger soft-to-strong range
+  C  GRAIN    short / mid / long, plus a pre-swell that leads into a chrome wipe
+and a per-scene PLAN: which events sound at all, which variant, at which tier.
+No samples, no tonal beeps, no pitch sweeps, no bells, no drums, no reverb.
 
-Reads out/skralovnik/cues.json (exported from the picture's timeline) and writes:
-
-  sfx/skralovnik/A_shutter.wav, B_lock.wav, C_grain.wav   48 kHz / 24-bit, level-matched
-  sfx/skralovnik/audition-reel.wav                        A x3, B x3, C x3, then A B C
-  sfx/skralovnik/cue-sheet.md + cue-sheet.csv             film cues + reel timestamps
-  sfx/skralovnik/qc.md                                    peaks, endings, mono compatibility
-  out/skralovnik/soundtrack.wav                           the film's SFX-only track (muxed by post.py)
-
+Reads out/skralovnik/cues.json and writes:
+  sfx/skralovnik/round2/*.wav                   every variant, 48 kHz / 24-bit, level-matched
+  sfx/skralovnik/round2/audition-reel.wav       A family, B family, C family, level-matched
+  sfx/skralovnik/round2/cue-sheet.md + .csv     the plan per scene + reel timestamps
+  sfx/skralovnik/round2/qc.md                   peaks, endings, mono compatibility
+  out/skralovnik/soundtrack.wav                 the film's SFX-only track (muxed by post.py)
 Everything is seeded, so re-running reproduces the exact files.
 """
 import csv
@@ -30,22 +36,13 @@ from scipy import signal
 
 SR = 48000
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-OUT = os.path.join(ROOT, 'sfx', 'skralovnik')
+OUT = os.path.join(ROOT, 'sfx', 'skralovnik', 'round2')
 WORK = os.path.join(ROOT, 'out', 'skralovnik')
 CUES = json.load(open(os.path.join(WORK, 'cues.json')))
 
-# Function -> prototype, and the level each function plays at in the film (dB, relative to the
-# level-matched prototype). One prototype serves several functions on purpose: round 1 tests the
-# three sounds, variations come after feedback.
-MAP = {
-    'transition': ('A', 0.0),
-    'micro': ('A', -5.0),
-    'lock': ('B', -2.0),
-    'resolve': ('B', +2.0),
-    'texture': ('C', -3.0),
-}
-MATCH_LUFS = -20.0  # momentary loudness every prototype is matched to (400 ms window)
+MATCH_LUFS = -20.0  # every variant is matched to this momentary loudness before tiers apply
 TP_CEIL = -1.0      # dBTP
+TIER_DB = {'soft': -10.0, 'mid': -4.5, 'strong': 0.0}
 
 
 def n_of(sec):
@@ -60,6 +57,10 @@ def hp(x, f, order=2):
     return signal.sosfilt(signal.butter(order, f, 'high', fs=SR, output='sos'), x)
 
 
+def lp(x, f, order=2):
+    return signal.sosfilt(signal.butter(order, f, 'low', fs=SR, output='sos'), x)
+
+
 def burst(rng, dur, tau, lo, hi, order=2):
     """Band-limited noise with an exponential decay: the basic hard-contact transient."""
     n = n_of(dur)
@@ -68,8 +69,8 @@ def burst(rng, dur, tau, lo, hi, order=2):
 
 
 def modal(exc, freqs, decays_ms, gains):
-    """A dense cluster of short two-pole resonators at inharmonic ratios. The decays are a few
-    milliseconds, so the cluster reads as material (metal, plastic), never as a pitch."""
+    """A dense cluster of short two-pole resonators at inharmonic ratios. Decays stay in the
+    tens of milliseconds, so the cluster reads as material (metal, plastic), never as a pitch."""
     y = np.zeros_like(exc)
     for f, d, g in zip(freqs, decays_ms, gains):
         r = np.exp(-1.0 / (d / 1000 * SR))
@@ -105,71 +106,120 @@ def finish(x, fade_ms=4.0):
 
 
 # ---------------------------------------------------------------------------------------
-# A: SHUTTER (micro-cut, transition)
+# A: SHUTTER family
 # ---------------------------------------------------------------------------------------
-def proto_a():
-    rng = np.random.default_rng(101)
-    x = np.zeros(n_of(0.085))
-    # open: hard click + a dull noise "thock" (the blade stack moving), no pitch in it
-    click = burst(rng, 0.004, 0.0006, 2500, 13000)
+def shutter(seed, gap=0.013, weight=0.9, bright=1.0, rattle=5, close=0.72, drive=1.6, dur=0.085):
+    """Leaf shutter: open click + dull noise thock, a close click `gap` later, a spring rattle.
+    weight scales the low thock, bright moves the click bands up or down, rattle is the count of
+    micro-contacts after the close."""
+    rng = np.random.default_rng(seed)
+    x = np.zeros(n_of(dur))
+    click = burst(rng, 0.004, 0.0006, 2500 * bright, 13000 * min(1.0, bright * 1.05))
     add(x, click, 0.0, 1.0)
-    add(x, burst(rng, 0.030, 0.0045, 110, 700), 0.0003, 0.9)
-    add(x, modal(click, [1830, 2710, 3390, 4460, 5230, 6870, 8120], [5.5, 4.8, 4.2, 3.8, 3.3, 2.8, 2.4],
+    add(x, burst(rng, 0.030, 0.0045, 110, 700), 0.0003, weight)
+    add(x, modal(click, np.array([1830, 2710, 3390, 4460, 5230, 6870, 8120]) * bright, [5.5, 4.8, 4.2, 3.8, 3.3, 2.8, 2.4],
                  [0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3]), 0.0, 0.22)
-    # close: 13 ms later, brighter and lighter
-    click2 = burst(rng, 0.003, 0.0004, 3500, 15000)
-    add(x, click2, 0.013, 0.72)
-    add(x, burst(rng, 0.020, 0.0025, 220, 950), 0.0132, 0.38)
-    add(x, modal(click2, [2310, 3570, 4880, 6150, 7730], [3.5, 3.0, 2.6, 2.2, 1.9], [0.8, 0.7, 0.6, 0.5, 0.4]), 0.013, 0.16)
-    # spring rattle: a few micro-contacts that die fast
-    for t, g in ((0.0185, 0.24), (0.0228, 0.17), (0.0281, 0.10), (0.0352, 0.055), (0.0436, 0.03)):
+    click2 = burst(rng, 0.003, 0.0004, 3500 * bright, 15000)
+    add(x, click2, gap, close)
+    add(x, burst(rng, 0.020, 0.0025, 220, 950), gap + 0.0002, 0.38 * weight / 0.9)
+    add(x, modal(click2, np.array([2310, 3570, 4880, 6150, 7730]) * bright, [3.5, 3.0, 2.6, 2.2, 1.9], [0.8, 0.7, 0.6, 0.5, 0.4]), gap, 0.16)
+    t, g = gap + 0.0055, 0.24
+    for _ in range(rattle):
         add(x, burst(rng, 0.0015, 0.00022, 4000, 14000), t, g)
-    x = np.tanh(x * 1.6) / 1.6  # a touch of hardness
+        t += rng.uniform(0.004, 0.0085)
+        g *= rng.uniform(0.55, 0.72)
+    x = np.tanh(x * drive) / drive
     return finish(x, 5)
 
 
+A_FAMILY = {
+    # name: (description, kwargs)
+    'A1_heavy': ('heavy: slower blades, more body, longer rattle (the few strong cuts)',
+                 dict(seed=111, gap=0.017, weight=1.35, bright=0.85, rattle=6, close=0.8, drive=2.0, dur=0.1)),
+    'A2_mid': ('mid: round-1 shutter, the reference', dict(seed=101)),
+    'A3_mid_tight': ('mid, tighter: faster blades, brighter, short rattle',
+                     dict(seed=131, gap=0.009, weight=0.75, bright=1.15, rattle=3, close=0.65)),
+    'A4_soft': ('soft: light click, little body, two rattles', dict(seed=141, gap=0.011, weight=0.45, bright=1.1, rattle=2, close=0.5, drive=1.2, dur=0.06)),
+    'A5_soft_dull': ('soft, duller: darker click, no rattle', dict(seed=151, gap=0.014, weight=0.55, bright=0.7, rattle=0, close=0.45, drive=1.2, dur=0.05)),
+    'A6_tick': ('tiny tick: single blade, for the smallest interruptions', dict(seed=161, gap=0.006, weight=0.25, bright=1.25, rattle=1, close=0.3, drive=1.1, dur=0.035)),
+}
+
+
 # ---------------------------------------------------------------------------------------
-# B: LOCK (object lock, resolve)
+# B: LOCK family (more metal, a spring, a bigger range)
 # ---------------------------------------------------------------------------------------
-def proto_b():
-    rng = np.random.default_rng(202)
-    x = np.zeros(n_of(0.115))
-    # focus servo: five steps, intervals shrinking 16 > 12 > 9 > 6 ms, each step crushed
+METAL = [1180, 1730, 2410, 3190, 4270, 5620, 7040]  # inharmonic: no two modes share a ratio
+
+
+def lock(seed, steps=5, servo=1.0, latch=1.0, ring_ms=16.0, spring=6, thump=0.0, bits=0.22, dur=0.16):
+    """Focus servo steps (quiet to loud, accelerating) into a metal latch that rings for a few
+    tens of milliseconds, then a spring settling in irregular decaying contacts."""
+    rng = np.random.default_rng(seed)
+    x = np.zeros(n_of(dur))
+    gaps = np.geomspace(0.017, 0.005, max(1, steps - 1)) if steps > 1 else []
     t = 0.0
-    for i, (gap, g) in enumerate(((0.016, 0.30), (0.012, 0.36), (0.009, 0.42), (0.006, 0.5), (0.0, 0.56))):
+    for i in range(steps):
         tick = burst(rng, 0.004, 0.0005, 1500, 7500)
         tick = hold(crush(tick / (np.abs(tick).max() + 1e-9), 7), 3) * np.abs(tick).max()
-        add(x, tick, t, g)
-        t += gap
-    latch_t = t + 0.009
-    # latch: the heavier contact that says "held"
+        add(x, tick, t, servo * (0.12 + 0.46 * (i + 1) / steps) ** 1.4)  # crescendo: more dynamics
+        if i < len(gaps):
+            t += gaps[i]
+    lt = t + 0.009
+    # the latch: hard contact, low-mid body, and a metal cluster that rings for ~ring_ms
     click = burst(rng, 0.005, 0.0008, 1200, 11000)
-    add(x, click, latch_t, 1.0)
-    add(x, burst(rng, 0.040, 0.0065, 240, 1400), latch_t + 0.0002, 0.85)
-    add(x, modal(click, [910, 1370, 2230, 2980, 3910], [7.5, 6.5, 5.5, 4.5, 3.5], [0.9, 0.8, 0.7, 0.55, 0.4]), latch_t, 0.2)
+    add(x, click, lt, latch)
+    add(x, burst(rng, 0.045, 0.007, 220, 1400), lt + 0.0002, 0.85 * latch)
+    decays = [ring_ms * k for k in (1.0, 0.9, 0.8, 0.7, 0.6, 0.5, 0.4)]
+    add(x, modal(click, METAL, decays, [0.9, 0.85, 0.75, 0.6, 0.5, 0.4, 0.3]), lt, 0.32 * latch)
+    if thump > 0:  # a short filtered-noise weight under the strongest lock (not a drum: no pitch, 15 ms)
+        n = n_of(0.02)
+        th = lp(rng.standard_normal(n) * np.exp(-np.arange(n) / (0.005 * SR)), 180, 2)
+        add(x, th / (np.abs(th).max() + 1e-9), lt, thump)
+    # spring: irregular, decaying contacts, each coloured by the same metal
+    st, sg = lt + 0.007, 0.34 * latch
+    for _ in range(spring):
+        c = burst(rng, 0.002, 0.00035, 900, 6000)
+        add(x, c + modal(c, METAL, [4, 3.5, 3, 2.6, 2.2, 1.9, 1.6], [0.6] * 7) * 0.5, st, sg)
+        st += rng.uniform(0.005, 0.011)
+        sg *= rng.uniform(0.58, 0.74)
     # a burst of bits: held random values (aperiodic, so no pitch), crushed to 4 bits
-    n = n_of(0.018)
-    bits = hold(rng.uniform(-1, 1, n), 22) * np.exp(-np.arange(n) / (0.0045 * SR))
-    add(x, bp(crush(bits, 4), 700, 6500), latch_t + 0.006, 0.22)
-    x = np.tanh(x * 1.4) / 1.4
-    return finish(x, 5)
+    if bits > 0:
+        n = n_of(0.018)
+        b = hold(rng.uniform(-1, 1, n), 22) * np.exp(-np.arange(n) / (0.0045 * SR))
+        add(x, bp(crush(b, 4), 700, 6500), lt + 0.006, bits)
+    x = np.tanh(x * 1.5) / 1.5
+    return finish(x, 6)
+
+
+B_FAMILY = {
+    'B1_soft': ('soft: three quiet servo steps, light latch, short ring, two spring contacts',
+                dict(seed=211, steps=3, servo=0.7, latch=0.6, ring_ms=9, spring=2, bits=0.1, dur=0.11)),
+    'B2_mid': ('mid: five steps into a metal latch with a spring settle', dict(seed=221, steps=5, servo=0.9, latch=0.9, ring_ms=14, spring=5, bits=0.18)),
+    'B3_strong': ('strong: long servo run, heavy metal latch, weight, full spring (the logo lock)',
+                  dict(seed=231, steps=7, servo=1.0, latch=1.15, ring_ms=22, spring=8, thump=0.55, bits=0.22, dur=0.22)),
+}
 
 
 # ---------------------------------------------------------------------------------------
-# C: GRAIN (texture movement)
+# C: GRAIN family (lengths)
 # ---------------------------------------------------------------------------------------
-def proto_c():
-    rng = np.random.default_rng(303)
-    dur = 0.26
+def grain(seed, dur=0.26, attack=0.025, release=0.10, rate=950, swell=False):
+    """Scanner head: Poisson cloud of crushed noise grains over a stepped, held-noise bed.
+    swell=True makes the density rise to the end instead of falling (leads into a hit)."""
+    rng = np.random.default_rng(seed)
     n = n_of(dur)
     tt = np.arange(n) / SR
-    dens = np.clip(tt / 0.025, 0, 1) * np.where(tt < 0.15, 1.0, 0.5 * (1 + np.cos(np.pi * np.clip((tt - 0.15) / 0.10, 0, 1))))
+    if swell:
+        dens = np.clip(tt / dur, 0, 1) ** 1.6
+        dens *= np.clip((dur - tt) / 0.004, 0, 1)
+    else:
+        hold_to = dur - release
+        dens = np.clip(tt / attack, 0, 1) * np.where(tt < hold_to, 1.0, 0.5 * (1 + np.cos(np.pi * np.clip((tt - hold_to) / release, 0, 1))))
     L, R = np.zeros(n), np.zeros(n)
-    # grain cloud: Poisson arrivals, each grain a short band of noise at a random (not swept) centre
     t = 0.0
     while t < dur:
         d = dens[min(n - 1, n_of(t))]
-        t += rng.exponential(1 / (950 * max(d, 0.05)))
+        t += rng.exponential(1 / (rate * max(d, 0.05)))
         if t >= dur or rng.random() > d:
             continue
         gl = rng.uniform(0.0004, 0.0025)
@@ -177,13 +227,11 @@ def proto_c():
         fc = np.exp(rng.uniform(np.log(1200), np.log(9000)))
         g = bp(np.concatenate([g, np.zeros(64)]), fc / 1.6, fc * 1.6, 1)
         amp = rng.uniform(0.25, 1.0)
-        pan = rng.uniform(-0.45, 0.45)
-        a = (pan + 1) * np.pi / 4
+        a = (rng.uniform(-0.45, 0.45) + 1) * np.pi / 4
         i = n_of(t)
         m = min(len(g), n - i)
         L[i:i + m] += g[:m] * amp * np.cos(a)
         R[i:i + m] += g[:m] * amp * np.sin(a)
-    # bed: held noise through a stepped random gain, the head dragging across the surface
     bed = hp(hold(rng.standard_normal(n), 6), 900, 2)
     steps = np.zeros(n)
     i = 0
@@ -191,11 +239,72 @@ def proto_c():
         k = n_of(rng.uniform(0.012, 0.025))
         steps[i:i + k] = rng.uniform(0.3, 1.0)
         i += k
-    steps = signal.sosfilt(signal.butter(1, 400, 'low', fs=SR, output='sos'), steps)
+    steps = lp(steps, 400, 1)
     bed = crush(bed / np.abs(bed).max(), 6) * steps * dens * 0.33
     x = np.stack([L + bed, R + bed], 1)
     x = np.tanh(x * 1.3) / 1.3
     return np.stack([finish(x[:, 0], 8), finish(x[:, 1], 8)], 1)
+
+
+C_FAMILY = {
+    'C1_short': ('short: 120 ms, for quick passes', dict(seed=311, dur=0.12, attack=0.015, release=0.05)),
+    'C2_mid': ('mid: round-1 grain, 260 ms', dict(seed=303)),
+    'C3_long': ('long: 520 ms, sparser, for slow traces and the sparkles flying in', dict(seed=331, dur=0.52, attack=0.06, release=0.2, rate=700)),
+    'C4_swell': ('pre-swell: 160 ms, density rising into the chrome wipe hit', dict(seed=341, dur=0.16, rate=1100, swell=True)),
+}
+
+FAMILY_OF = {'A': (shutter, A_FAMILY), 'B': (lock, B_FAMILY), 'C': (grain, C_FAMILY)}
+
+
+# ---------------------------------------------------------------------------------------
+# The plan: per scene, which events sound, which variant, which tier.
+# Keys are cue ids from the picture's timeline. Anything not listed is silent on purpose.
+# (sound, tier[, offset in frames]) ; a list plays several.
+# ---------------------------------------------------------------------------------------
+SCENES = {
+    'Boot': 'one soft grain as the system wakes',
+    'Present': 'hard entry: the strongest cut of the film, a soft lock, one scan',
+    'Build (ring)': 'mechanical detail: a soft slice, a metal lock on the ring',
+    'Train': 'chrome: a swell into a heavy hit, one mid type hit',
+    'Build (notebook)': 'quiet: a soft entry and a long soft trace',
+    'Run': 'speed: mid entry, the smear, a soft type tick',
+    'Team': 'calm: the cut is silent, a mid lock on the two of them, a soft globe',
+    'Recover': 'heat: a mid black-frame cut, soft lock, soft rising band',
+    'Repeat': 'chrome again: swell into a heavy hit, a soft lock, a mid type hit, a soft slice',
+    'Outro': 'a four-shot motor drive that fades, the sparkles fly in, the strong metal lock, the wordmark grains',
+}
+PLAN = {
+    'boot': [('C1_short', 'soft')],
+    'p-in': [('A1_heavy', 'strong')],
+    'p-lock': [('B1_soft', 'soft')],
+    'p-band': [('C2_mid', 'mid')],
+    'b1-in': [('A4_soft', 'mid')],
+    'b1-lock': [('B2_mid', 'mid')],
+    't-in': [('C4_swell', 'mid', -5), ('A1_heavy', 'strong')],
+    't-type': [('A3_mid_tight', 'mid')],
+    'b2-in': [('A5_soft_dull', 'soft')],
+    'b2-contour': [('C3_long', 'soft')],
+    'r-in': [('A2_mid', 'mid')],
+    'r-smear': [('C2_mid', 'mid')],
+    'r-type': [('A6_tick', 'soft')],
+    'tm-lock': [('B2_mid', 'mid')],
+    'tm-globe': [('C3_long', 'soft')],
+    'rc-in': [('A3_mid_tight', 'mid')],
+    'rc-lock': [('B1_soft', 'soft')],
+    'rc-band': [('C1_short', 'soft')],
+    'rp-in': [('C4_swell', 'mid', -5), ('A1_heavy', 'strong')],
+    'rp-lock': [('B1_soft', 'soft')],
+    'rp-type': [('A2_mid', 'mid')],
+    'rp-slice': [('A4_soft', 'soft')],
+    'recap-1': [('A3_mid_tight', 'soft')],
+    'recap-3': [('A4_soft', 'soft')],
+    'recap-5': [('A5_soft_dull', 'soft')],
+    'recap-7': [('A6_tick', 'soft')],
+    'converge': [('C3_long', 'mid')],
+    'lockup': [('B3_strong', 'strong')],
+    'wordmark': [('C1_short', 'soft')],
+}
+SCENE_OF_SHOT = ['Present', 'Build (ring)', 'Train', 'Build (notebook)', 'Run', 'Team', 'Recover', 'Repeat']
 
 
 # ---------------------------------------------------------------------------------------
@@ -226,13 +335,7 @@ def momentary(x):
 
 
 def true_peak(x):
-    x = stereo(x)
-    up = signal.resample_poly(x, 4, 1, axis=0)
-    return 20 * np.log10(np.abs(up).max() + 1e-12)
-
-
-def sample_peak(x):
-    return 20 * np.log10(np.abs(x).max() + 1e-12)
+    return 20 * np.log10(np.abs(signal.resample_poly(stereo(x), 4, 1, axis=0)).max() + 1e-12)
 
 
 def qc(name, x):
@@ -242,84 +345,23 @@ def qc(name, x):
     l, r = x[:, 0], x[:, 1]
     corr = float(np.corrcoef(l, r)[0, 1]) if np.std(l) > 0 and np.std(r) > 0 else 1.0
     st_e = np.mean(l ** 2 + r ** 2) / 2
-    mono_e = np.mean(mono ** 2)
     return {
         'name': name,
         'dur_ms': round(len(x) / SR * 1000, 1),
         'momentary_lufs': round(momentary(x), 1),
-        'sample_peak_dbfs': round(sample_peak(x), 2),
+        'sample_peak_dbfs': round(20 * np.log10(np.abs(x).max() + 1e-12), 2),
         'true_peak_dbtp': round(true_peak(x), 2),
         'first_sample': float(np.abs(x[0]).max()),
         'last_sample': float(np.abs(x[-1]).max()),
         'tail_5ms_dbfs': round(20 * np.log10(np.sqrt(np.mean(tail ** 2)) + 1e-12), 1),
         'dc': float(np.abs(x.mean(0)).max()),
         'lr_correlation': round(corr, 3),
-        'mono_sum_change_db': round(10 * np.log10((mono_e + 1e-20) / (st_e + 1e-20)), 2),
+        'mono_sum_change_db': round(10 * np.log10((np.mean(mono ** 2) + 1e-20) / (st_e + 1e-20)), 2),
     }
 
 
 def write(path, x):
     sf.write(path, stereo(x), SR, subtype='PCM_24')
-
-
-# ---------------------------------------------------------------------------------------
-# build
-# ---------------------------------------------------------------------------------------
-def main():
-    os.makedirs(OUT, exist_ok=True)
-    protos = {'A': ('SHUTTER', proto_a()), 'B': ('LOCK', proto_b()), 'C': ('GRAIN', proto_c())}
-
-    # level-match on momentary loudness, then make sure the loudest peak still clears the ceiling
-    gains = {k: 10 ** ((MATCH_LUFS - momentary(x)) / 20) for k, (_, x) in protos.items()}
-    worst = max(true_peak(protos[k][1] * g) for k, g in gains.items())
-    trim = min(1.0, 10 ** ((TP_CEIL - 0.2 - worst) / 20))
-    matched = {k: (nm, protos[k][1] * gains[k] * trim) for k, (nm, _) in protos.items()}
-    files = {'A': 'A_shutter.wav', 'B': 'B_lock.wav', 'C': 'C_grain.wav'}
-    for k, (nm, x) in matched.items():
-        write(os.path.join(OUT, files[k]), x)
-
-    # audition reel: each prototype three times, then the three in a row
-    reel_marks = []
-    reel = np.zeros((n_of(9.0), 2))
-    t = 0.5
-    for k in 'ABC':
-        for i in range(3):
-            add2(reel, stereo(matched[k][1]), t)
-            reel_marks.append((t, f'{k} {matched[k][0]} ({i + 1}/3)'))
-            t += 0.5
-        t += 0.7
-    for k in 'ABC':
-        add2(reel, stereo(matched[k][1]), t)
-        reel_marks.append((t, f'{k} {matched[k][0]} (sequence)'))
-        t += 0.5
-    reel = reel[:n_of(t + 0.8)]
-    write(os.path.join(OUT, 'audition-reel.wav'), reel)
-
-    # the film's SFX-only track
-    total = CUES['total'] / CUES['fps']
-    film = np.zeros((n_of(total + 0.5), 2))
-    rows = []
-    for c in CUES['cues']:
-        k, db = MAP[c['fn']]
-        x = stereo(matched[k][1]) * 10 ** (db / 20)
-        a = (c['pan'] + 1) * np.pi / 4
-        x = x * np.array([np.cos(a), np.sin(a)]) * np.sqrt(2)  # constant power, 0 dB at centre
-        add2(film, x, c['t'])
-        rows.append(c | {'proto': f"{k} {matched[k][0]}", 'gain_db': db})
-    film = film[:n_of(total)]
-    tp = true_peak(film)
-    if tp > TP_CEIL:
-        film *= 10 ** ((TP_CEIL - tp) / 20)
-    write(os.path.join(WORK, 'soundtrack.wav'), film)
-
-    # reports
-    report = [qc(f"{k} {matched[k][0]}", matched[k][1]) for k in 'ABC']
-    report.append(qc('audition reel', reel))
-    report.append(qc('film soundtrack', film))
-    write_cue_sheet(rows, reel_marks)
-    write_qc(report, gains, trim, film)
-    for r in report:
-        print(r)
 
 
 def add2(dst, x, t):
@@ -333,55 +375,103 @@ def tc(frame, fps=30):
     return f'00:00:{s:02d}:{f:02d}'
 
 
-def write_cue_sheet(rows, reel_marks):
-    fields = ['id', 'frame', 'timecode', 't', 'fn', 'proto', 'gain_db', 'pan', 'chapter', 'look', 'note']
+# ---------------------------------------------------------------------------------------
+# build
+# ---------------------------------------------------------------------------------------
+def main():
+    os.makedirs(OUT, exist_ok=True)
+    raw = {}
+    desc = {}
+    for fam, (fn, table) in FAMILY_OF.items():
+        for name, (d, kw) in table.items():
+            raw[name] = fn(**kw)
+            desc[name] = d
+    # level-match every variant, then one common trim so the loudest true peak clears the ceiling
+    gains = {k: 10 ** ((MATCH_LUFS - momentary(x)) / 20) for k, x in raw.items()}
+    worst = max(true_peak(raw[k] * g) for k, g in gains.items())
+    trim = min(1.0, 10 ** ((TP_CEIL - 0.2 - worst) / 20))
+    matched = {k: stereo(raw[k] * gains[k] * trim) for k in raw}
+    for k, x in matched.items():
+        write(os.path.join(OUT, f'{k}.wav'), x)
+
+    # audition reel: each family in order, level-matched, 0.5 s apart (0.8 s for long sounds)
+    reel = np.zeros((n_of(20.0), 2))
+    marks, t = [], 0.5
+    for fam in 'ABC':
+        for k in FAMILY_OF[fam][1]:
+            add2(reel, matched[k], t)
+            marks.append((t, k, desc[k]))
+            t += max(0.5, len(matched[k]) / SR + 0.3)
+        t += 0.6
+    reel = reel[:n_of(t + 0.5)]
+    write(os.path.join(OUT, 'audition-reel.wav'), reel)
+
+    # the film: only planned cues sound, at their tier, panned to where they happen
+    total = CUES['total'] / CUES['fps']
+    film = np.zeros((n_of(total + 0.5), 2))
+    rows = []
+    fps = CUES['fps']
+    for c in CUES['cues']:
+        for item in PLAN.get(c['id'], []):
+            name, tier = item[0], item[1]
+            off = item[2] if len(item) > 2 else 0
+            a = (c['pan'] + 1) * np.pi / 4
+            x = matched[name] * 10 ** (TIER_DB[tier] / 20) * np.array([np.cos(a), np.sin(a)]) * np.sqrt(2)
+            at = c['t'] + off / fps
+            add2(film, x, at)
+            rows.append(c | {'sound': name, 'tier': tier, 'frame_played': c['frame'] + off, 't_played': round(at, 4)})
+    film = film[:n_of(total)]
+    film *= 10 ** ((TP_CEIL - true_peak(film)) / 20)  # the strong hits peak at the ceiling, soft ones stay soft
+    write(os.path.join(WORK, 'soundtrack.wav'), film)
+
+    report = [qc(k, matched[k]) for k in matched] + [qc('audition reel', reel), qc('film soundtrack', film)]
+    write_cue_sheet(rows, marks, len(CUES['cues']))
+    write_qc(report, trim, film)
+    silent = len(CUES['cues']) - len({r['id'] for r in rows})
+    print(f'{len(rows)} sounds on {len({r["id"] for r in rows})} of {len(CUES["cues"])} events ({silent} silent);',
+          'tiers', {t: sum(1 for r in rows if r['tier'] == t) for t in TIER_DB})
+    for r in report:
+        print(r['name'], r['dur_ms'], 'ms', r['true_peak_dbtp'], 'dBTP', 'corr', r['lr_correlation'])
+
+
+def write_cue_sheet(rows, marks, n_events):
+    fields = ['id', 'frame_played', 'timecode', 't_played', 'fn', 'sound', 'tier', 'pan', 'chapter', 'look', 'note']
     with open(os.path.join(OUT, 'cue-sheet.csv'), 'w', newline='') as fh:
         w = csv.DictWriter(fh, fieldnames=fields)
         w.writeheader()
         for r in rows:
-            w.writerow({k: (tc(r['frame']) if k == 'timecode' else r[k]) for k in fields})
-    fn_rows = {}
-    for r in rows:
-        fn_rows.setdefault(r['fn'], []).append(r)
-    md = ['# SKRALOVNIK film: SFX cue sheet (round 1)', '',
-          'Picture: 30 fps, 303 frames (10.1 s). Audio: 48 kHz / 24-bit, SFX only (the original sound is removed).', '',
-          '## Visual events by function', '',
-          '| Function | Prototype | Level | Events | What happens on screen |', '|---|---|---|---|---|']
-    what = {
-        'micro': '1-2 frame interruptions inside a shot: negative, punch-in, 1-bit frame, type flash, colour frame, system frame, chrome frame, contact-sheet tiles',
-        'transition': 'the hit on each cut: negative, slice glitch, chrome sparkle wipe, 1-bit entry, system strip, black frame',
-        'lock': 'brackets fly in and lock onto the subject (face, ring, head, both of them, silhouette, the lift)',
-        'texture': 'something textural travels: boot lines, 1-bit scan bands, film strips, contour trace, smear, globe, chrome travel, wordmark resolving',
-        'resolve': 'the four sparkles lock into the SKRALOVNIK symbol',
-    }
-    for fn in ('micro', 'transition', 'lock', 'texture', 'resolve'):
-        k, db = MAP[fn]
-        md.append(f"| {fn} | {k} {dict(A='SHUTTER', B='LOCK', C='GRAIN')[k]} | {db:+.0f} dB | {len(fn_rows.get(fn, []))} | {what[fn]} |")
-    md += ['', '## Film cues', '', '| # | Timecode | Frame | Function | Prototype | Level | Pan | Chapter | Event |', '|---|---|---|---|---|---|---|---|---|']
+            w.writerow({k: (tc(r['frame_played']) if k == 'timecode' else r[k]) for k in fields})
+    md = ['# SKRALOVNIK film: SFX cue sheet (round 2)', '',
+          'Round 1 feedback: A works but repeats too often; B works, wants more metal and spring; C works; '
+          'overall too many sounds and one pattern repeating through the film. Round 2: families of variants, '
+          f'a pattern per scene, {len(rows)} sounds on {len({r["id"] for r in rows})} of {n_events} picture events, '
+          f'tiers soft {TIER_DB["soft"]:+.1f} dB, mid {TIER_DB["mid"]:+.1f} dB, strong {TIER_DB["strong"]:+.1f} dB.', '',
+          'Picture used for this round: v1 (the v2 picture changes events; the plan moves with it).', '',
+          '## Patterns per scene', '', '| Scene | Pattern |', '|---|---|']
+    md += [f'| {s} | {p} |' for s, p in SCENES.items()]
+    md += ['', '## Film cues', '', '| # | Timecode | Function | Sound | Tier | Pan | Scene | Event |', '|---|---|---|---|---|---|---|---|']
     for i, r in enumerate(rows, 1):
-        md.append(f"| {i} | {tc(r['frame'])} | {r['frame']} | {r['fn']} | {r['proto']} | {r['gain_db']:+.0f} dB | {r['pan']:+.2f} | {r['chapter']} | {r['note']} |")
-    md += ['', '## Audition reel', '', '| Time | Sound |', '|---|---|']
-    for t, lab in reel_marks:
-        md.append(f'| {t:.2f} s | {lab} |')
+        scene = SCENE_OF_SHOT[r['shot']] if 0 <= r['shot'] < 8 else r['chapter']
+        md.append(f"| {i} | {tc(r['frame_played'])} | {r['fn']} | {r['sound']} | {r['tier']} | {r['pan']:+.2f} | {scene} | {r['note']} |")
+    md += ['', '## Audition reel (level-matched)', '', '| Time | Sound | What it is |', '|---|---|---|']
+    md += [f'| {t:.2f} s | {k} | {d} |' for t, k, d in marks]
     open(os.path.join(OUT, 'cue-sheet.md'), 'w').write('\n'.join(md) + '\n')
 
 
-def write_qc(report, gains, trim, film):
-    meter = pyln.Meter(SR)
-    integ = meter.integrated_loudness(film)
-    md = ['# SFX QC (round 1)', '',
-          f'Level match: every prototype at {MATCH_LUFS:.0f} LUFS momentary (one 400 ms K-weighted block), '
-          f'then trimmed {20 * np.log10(trim):+.2f} dB so the loudest true peak stays under {TP_CEIL:.0f} dBTP.', '',
+def write_qc(report, trim, film):
+    integ = pyln.Meter(SR).integrated_loudness(film)
+    md = ['# SFX QC (round 2)', '',
+          f'Level match: every variant at {MATCH_LUFS:.0f} LUFS momentary, then trimmed {20 * np.log10(trim):+.2f} dB '
+          f'so the loudest true peak stays under {TP_CEIL:.0f} dBTP. Tiers are applied only in the film mix.', '',
           '| File | Length | Momentary (max) | Sample peak | True peak | First / last sample | Last 5 ms | DC | L/R corr. | Mono sum |',
           '|---|---|---|---|---|---|---|---|---|---|']
     for r in report:
         md.append(f"| {r['name']} | {r['dur_ms']:.0f} ms | {r['momentary_lufs']:.1f} LUFS | {r['sample_peak_dbfs']:.2f} dBFS | "
                   f"{r['true_peak_dbtp']:.2f} dBTP | {r['first_sample']:.1e} / {r['last_sample']:.1e} | {r['tail_5ms_dbfs']:.0f} dBFS | "
                   f"{r['dc']:.1e} | {r['lr_correlation']:.3f} | {r['mono_sum_change_db']:+.2f} dB |")
-    md += ['', f'Film soundtrack integrated loudness: {integ:.1f} LUFS (sparse transients, so integrated reads low; the peaks are what matter).', '',
-           'How to read it:', '',
-           '- **Clean endings:** every file starts and ends on zero (a 0.15 ms fade in, a raised-cosine fade out) and the last 5 ms sit far below audibility.',
-           '- **Mono compatibility:** A and B are mono sources (L = R, correlation 1.000, mono sum 0 dB). C scatters its grains across the stereo field; its correlation stays positive and the mono sum loses only what uncorrelated grains always lose, with no comb filtering because nothing is delayed between channels.',
+    md += ['', f'Film soundtrack integrated loudness: {integ:.1f} LUFS (sparse, mostly soft transients).', '',
+           '- **Clean endings:** every file starts and ends on zero and the last 5 ms sit far below audibility.',
+           '- **Mono compatibility:** A and B are mono sources (L = R). C scatters grains across the field without inter-channel delay, so its mono sum loses only the uncorrelated part and never comb-filters.',
            '- **Peaks:** true peak is measured with 4x oversampling.', '']
     open(os.path.join(OUT, 'qc.md'), 'w').write('\n'.join(md) + '\n')
 

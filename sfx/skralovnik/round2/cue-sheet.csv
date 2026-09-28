@@ -1,0 +1,32 @@
+id,frame_played,timecode,t_played,fn,sound,tier,pan,chapter,look,note
+boot,0,00:00:00:00,0.0,texture,C1_short,soft,0,Boot,boot,"hairline frame draws in from the corners, brand line types on"
+p-in,6,00:00:00:06,0.2,transition,A1_heavy,strong,0,Present,neg,cut in on the x-ray negative
+p-lock,13,00:00:00:13,0.4333,lock,B1_soft,soft,0.01,Present,lock,brackets lock onto the face
+p-band,22,00:00:00:22,0.7333,texture,C2_mid,mid,0,Present,band,1-bit scan band sweeps down
+b1-in,36,00:00:01:06,1.2,transition,A4_soft,mid,0,Build,slice,sliced glitch entry
+b1-lock,43,00:00:01:13,1.4333,lock,B2_mid,mid,0.11,Build,lock,brackets lock onto the ring
+t-in,60,00:00:02:00,2.0,transition,C4_swell,mid,0,Train,wipe,chrome sparkle swells through the lens and wipes to TRAIN
+t-in,65,00:00:02:05,2.1667,transition,A1_heavy,strong,0,Train,wipe,chrome sparkle swells through the lens and wipes to TRAIN
+t-type,77,00:00:02:17,2.5667,micro,A3_mid_tight,mid,0,Train,typeInv,TRAIN in ink on paper
+b2-in,96,00:00:03:06,3.2,transition,A5_soft_dull,soft,0,Build,dit+block,"arrives as 1-bit, a paper block knocks it into place"
+b2-contour,112,00:00:03:22,3.7333,texture,C3_long,soft,0,Build,contour,the silhouette traces itself in hairline
+r-in,128,00:00:04:08,4.2667,transition,A2_mid,mid,0,Run,sys+slice,"system strip, then a sliced entry"
+r-smear,143,00:00:04:23,4.7667,texture,C2_mid,mid,0,Run,smear,the stride smears into horizontal streaks
+r-type,153,00:00:05:03,5.1,micro,A6_tick,soft,0,Run,type,"RUN, too big for the frame"
+tm-lock,166,00:00:05:16,5.5333,lock,B2_mid,mid,-0.48,Team,lock,brackets lock onto both of them
+tm-globe,173,00:00:05:23,5.7667,texture,C3_long,soft,0,Team,globe,a wireframe globe turns inside the pendant lamp
+rc-in,188,00:00:06:08,6.2667,transition,A3_mid_tight,mid,0,Recover,black,"one frame of black, only the instruments"
+rc-lock,196,00:00:06:16,6.5333,lock,B1_soft,soft,0.12,Recover,lock,brackets lock onto the silhouette
+rc-band,204,00:00:06:24,6.8,texture,C1_short,soft,0,Recover,band,heat scan band rises
+rp-in,216,00:00:07:06,7.2,transition,C4_swell,mid,0,Repeat,wipe,chrome sparkle wipes to REPEAT
+rp-in,221,00:00:07:11,7.3667,transition,A1_heavy,strong,0,Repeat,wipe,chrome sparkle wipes to REPEAT
+rp-lock,229,00:00:07:19,7.6333,lock,B1_soft,soft,0.1,Repeat,lock,brackets lock onto the lift as the camera pulls back
+rp-type,233,00:00:07:23,7.7667,micro,A2_mid,mid,0,Repeat,typeInv,REPEAT in ink on paper
+rp-slice,245,00:00:08:05,8.1667,micro,A4_soft,soft,0,Repeat,slice,sliced glitch
+recap-1,248,00:00:08:08,8.2667,micro,A3_mid_tight,soft,0,Outro,recap,contact sheet: PRESENT drops into the grid
+recap-3,250,00:00:08:10,8.3333,micro,A4_soft,soft,0,Outro,recap,contact sheet: TRAIN drops into the grid
+recap-5,252,00:00:08:12,8.4,micro,A5_soft_dull,soft,0,Outro,recap,contact sheet: RUN drops into the grid
+recap-7,254,00:00:08:14,8.4667,micro,A6_tick,soft,0,Outro,recap,contact sheet: RECOVER drops into the grid
+converge,262,00:00:08:22,8.7333,texture,C3_long,mid,0,Outro,converge,four chrome sparkles fly in from the corners
+lockup,276,00:00:09:06,9.2,resolve,B3_strong,strong,0,Outro,lockup,the sparkles lock into the SKRALOVNIK symbol
+wordmark,280,00:00:09:10,9.3333,texture,C1_short,soft,0,Outro,wordmark,the wordmark resolves from 1-bit noise

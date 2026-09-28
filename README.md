@@ -20,10 +20,13 @@ a wireframe globe set inside the pendant lamp). The brand sparkle is a real 3D c
 wipes two cuts by swelling through the lens and, at the end, four of them lock into the SKRALOVNIK
 symbol above the wordmark from `logo.svg`. The only colour is the sauna's heat.
 
-**Sound.** Round 1 of an original SFX palette: three dry mechanical-digital prototypes (A SHUTTER,
-B LOCK, C GRAIN), no samples, no tonal beeps, sweeps, bells, drums or reverb. The cue sheet,
-audition reel, individual 48 kHz / 24-bit WAVs and QC (peaks, clean endings, mono compatibility)
-are in [`sfx/skralovnik/`](sfx/skralovnik/). Variations come after feedback on the prototypes.
+**Sound.** An original SFX palette built in rounds, no samples, no tonal beeps, sweeps, bells,
+drums or reverb. Round 1 ([`sfx/skralovnik/round1/`](sfx/skralovnik/round1/)) tested three dry
+mechanical-digital prototypes (A SHUTTER, B LOCK, C GRAIN). Round 2
+([`sfx/skralovnik/round2/`](sfx/skralovnik/round2/)) follows the feedback: families of variants so
+nothing repeats, more metal and spring in the lock, and a pattern per scene with fewer, mostly soft
+sounds and four strong ones. Each round has its cue sheet, a level-matched audition reel, the
+individual 48 kHz / 24-bit WAVs and QC (peaks, clean endings, mono compatibility).
 
 **Checks on every render** (`scripts/skralovnik/post.py`): audio sync to the sample, true peak after
 the AAC encode at or under −1 dBTP, and a flash scan (at most 2 full-frame luminance flashes in any
