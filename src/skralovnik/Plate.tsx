@@ -1,9 +1,7 @@
 import { Img } from 'remotion';
 import { Dither, full, Still } from './Bits';
 import { baseAt, CHAPTERS, FOOT_END, H, PRE, shotAt, shotStart, srcAt, W } from './timeline';
-import { INK, PAPER, PIXEL, plate, punchPlate, rnd, SERIF } from './tokens';
-import { Sys } from './Sys';
-import { ChromeFrame } from './Chrome';
+import { INK, PAPER, plate, rnd, SERIF } from './tokens';
 
 /** Channel isolators for the RGB split (screen-blended copies rebuild the image when aligned). */
 export const SvgDefs: React.FC = () => (
@@ -25,54 +23,44 @@ export const SvgDefs: React.FC = () => (
 const Split: React.FC<{ src: number; dx: number; spread: number; top: number }> = ({ src, dx, spread, top }) => (
   <div style={{ position: 'absolute', inset: 0, background: '#000', isolation: 'isolate' }}>
     {(['chR', 'chG', 'chB'] as const).map((id, i) => (
-      <Img
-        key={id}
-        src={plate('bw', src)}
-        style={{ ...full, top, left: dx + (i - 1) * spread, filter: `url(#${id})`, mixBlendMode: 'screen' }}
-      />
+      <Img key={id} src={plate('org', src)} style={{ ...full, top, left: dx + (i - 1) * spread, filter: `url(#${id})`, mixBlendMode: 'screen' }} />
     ))}
   </div>
 );
 
-/** Horizontal slices knocked sideways; a few pull from a few frames back, a few split RGB. */
-export const Slices: React.FC<{ o: number; src: number }> = ({ o, src }) => {
+/** A few thin strips of the frame knocked sideways, some split RGB, over the untouched footage. */
+export const Strips: React.FC<{ o: number }> = ({ o }) => {
+  const src = srcAt(o);
   const k = shotAt(o);
   const first = k >= 0 && k < 8 ? shotStart(k) - PRE : 0;
   const out: React.ReactNode[] = [];
-  let y = 0;
-  let i = 0;
-  while (y < H) {
-    const h = Math.round(24 + rnd(o, i, 1) * 150);
-    const big = rnd(o, i, 3) < 0.4;
-    const dx = Math.round((rnd(o, i, 2) - 0.5) * 2 * (big ? 230 : 36));
-    const back = rnd(o, i, 4) < 0.3 ? Math.max(first, src - 3) : src;
-    const rgb = rnd(o, i, 5) < 0.3;
+  for (let i = 0; i < 7; i++) {
+    const y = Math.round(rnd(o, i, 1) * (H - 60));
+    const h = Math.round(8 + rnd(o, i, 2) * 46);
+    const dx = Math.round((rnd(o, i, 3) - 0.5) * 2 * (rnd(o, i, 4) < 0.5 ? 180 : 40));
+    const back = rnd(o, i, 5) < 0.3 ? Math.max(first, src - 3) : src;
     out.push(
       <div key={i} style={{ position: 'absolute', left: 0, top: y, width: W, height: h, overflow: 'hidden' }}>
-        {rgb ? (
-          <Split src={back} dx={dx} spread={10 + Math.round(rnd(o, i, 6) * 14)} top={-y} />
+        {rnd(o, i, 6) < 0.45 ? (
+          <Split src={back} dx={dx} spread={8 + Math.round(rnd(o, i, 7) * 12)} top={-y} />
         ) : (
-          <Img src={plate('bw', back)} style={{ ...full, top: -y, left: dx }} />
+          <Img src={plate('org', back)} style={{ ...full, top: -y, left: dx }} />
         )}
       </div>,
     );
-    y += h;
-    i++;
   }
-  return <div style={{ ...full, overflow: 'hidden', background: INK }}>{out}</div>;
+  return <>{out}</>;
 };
 
 const WORD_SIZE: Record<string, number> = { PRESENT: 760, BUILD: 820, TRAIN: 800, RUN: 1060, TEAM: 900, RECOVER: 700, REPEAT: 740 };
 const WORD_X: Record<string, number> = { PRESENT: 900, TRAIN: 1010, RUN: 1000, REPEAT: 880 };
 
-/** The chapter word, too big for the frame. inv: ink on paper with a 1-bit tile pinned on. */
-export const TypeFlash: React.FC<{ o: number; inv?: boolean }> = ({ o, inv }) => {
-  const k = shotAt(o);
-  const word = CHAPTERS[k].toUpperCase();
-  const src = srcAt(o);
+/** The chapter word, too big for the frame, over the (still moving) footage. */
+export const TypeFlash: React.FC<{ o: number }> = ({ o }) => {
+  const word = CHAPTERS[shotAt(o)].toUpperCase();
   return (
-    <div style={{ ...full, background: inv ? PAPER : INK, overflow: 'hidden' }}>
-      {!inv && <Still src={src} style={{ filter: 'brightness(0.3) contrast(1.1)' }} />}
+    <div style={{ ...full, overflow: 'hidden' }}>
+      <Still src={srcAt(o)} style={{ filter: 'brightness(0.55)' }} />
       <div
         style={{
           position: 'absolute',
@@ -85,57 +73,32 @@ export const TypeFlash: React.FC<{ o: number; inv?: boolean }> = ({ o, inv }) =>
           lineHeight: 1,
           letterSpacing: '-0.015em',
           whiteSpace: 'nowrap',
-          color: inv ? INK : PAPER,
+          color: PAPER,
         }}
       >
         {word}
       </div>
-      {inv && (
-        <>
-          <Dither src={src} kind="d8" x={1560} y={836} style={{ mixBlendMode: 'multiply' }} />
-          <div style={{ position: 'absolute', left: 1550, top: 826, width: 260, height: 155, border: `1px solid ${INK}` }} />
-          <div style={{ position: 'absolute', left: 1550, top: 796, fontFamily: PIXEL, fontSize: 16, color: INK }}>
-            [{String(k + 1).padStart(2, '0')}] {word}
-          </div>
-        </>
-      )}
     </div>
   );
 };
 
-/** The whole-frame layer for output frame o. */
+/** The whole-frame layer for output frame o: the footage, or one of the four full-frame flashes. */
 export const Plate: React.FC<{ o: number }> = ({ o }) => {
   const { look, ev } = baseAt(o);
   const src = ev?.p?.src !== undefined ? Number(ev.p.src) : srcAt(o);
-  const inBoot = o < PRE;
-  const inOutro = o >= FOOT_END;
-  if ((inBoot || inOutro) && (look === 'bw' || look === 'black')) return <div style={{ ...full, background: INK }} />;
+  if ((o < PRE || o >= FOOT_END) && look === 'org') return <div style={{ ...full, background: INK }} />;
   switch (look) {
-    case 'bw':
+    case 'org':
       return <Still src={src} />;
-    case 'col':
-      return <Still kind="col" src={src} />;
     case 'neg':
-      return <Still src={src} style={{ filter: 'invert(1) contrast(1.25) brightness(1.05)' }} />;
+      return <Still src={src} style={{ filter: 'invert(1)' }} />;
     case 'dit':
       return (
         <div style={{ ...full, background: INK }}>
           <Dither src={src} />
         </div>
       );
-    case 'punch':
-      return <Img src={punchPlate(ev!.id)} style={full} />;
-    case 'slice':
-      return <Slices o={o} src={src} />;
-    case 'black':
-      return <div style={{ ...full, background: INK }} />;
     case 'type':
       return <TypeFlash o={o} />;
-    case 'typeInv':
-      return <TypeFlash o={o} inv />;
-    case 'sys':
-      return <Sys o={o} ev={ev!} />;
-    case 'chrome':
-      return <ChromeFrame o={o} />;
   }
 };

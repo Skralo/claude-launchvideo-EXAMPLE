@@ -5,7 +5,7 @@ v1 je končan in pushan na `claude/great-pascal-hvqe4s`:
 - `video/skralovnik-v1-web.mp4` (8 Mb/s)
 - SFX krog 1 v `sfx/skralovnik/`
 
-Feedback na v1 je zbran (spodaj). Sledi SFX krog 2 in v2 slika po tvojih overlay referencah.
+**v2 je narejen** (`video/skralovnik-v2.mp4`, web `video/skralovnik-v2-web.mp4`) po feedbacku spodaj in s tvojimi overlay elementi. Naslednje: tvoj feedback na v2 (sliko in SFX krog 2 v kontekstu) z obširno anketo.
 
 ## Kako sprašujem
 Ob vsakem začetku seje najprej vprašam s pop-up anketo. Vprašanja so obširna, vsako razložim po domače, pri vsakem odgovoru pa napišem, kaj bo spremenil.
@@ -43,7 +43,13 @@ SFX krog 2 (variacije, ker je feedback zdaj dan):
   - črna sličica ostane samo HUD čez kader.
 - **Konec:** krom iskrice se zaklenejo, nato postanejo **ploščat logo kot na spletni strani** (bel z zamikom).
 - **Oznake:** lahko več, IG stil, a **minimalistične, brez šuma**.
-- **Čakam na tvoje overlay reference** (poslal jih boš), preden gradim v2 sliko.
+- **Overlay elementi (28. 9.):** možgani, orel, gepard, trije ljudje, oko (prosojni PNG/WebP, v `public/skralovnik/elements/src/`).
+  - Razporeditev: PRESENT = možgani, TRAIN = orel, RUN = gepard, TEAM = trije ljudje, RECOVER = oko, REPEAT = orel. Oba BUILD kadra imata samo scan.
+  - Minimalistično, abstraktno. Okrogel scan analizira, nato se kot **rezultat** ob njem **bliskovito** (4 sličice) pokaže element.
+  - Barva se prilagodi kadru: beli na temnih, črni na svetlih (REPEAT je bel, ker je ozadje temno).
+- **Dodatno pojasnilo (28. 9.):** video je večino časa v originalni barvi, overlayi niso stalno sivo-beli, ampak le bliskoviti.
+  - Stalne oznake: ostanejo, pol gre ven (odstranjeni timecode, števec sličic, DAY.LOOP, črtna koda).
+  - Čist kader: **~60 %** (izmerjeno v2: 60 %, po kadrih 55–66 %).
 
 ## 3. Če video zamenja hero na spletni strani (`Skralo/skralovnik`, branch `website-v1`)
 - Stran že sama prekriva video z logom in poglavji (`CHAPTERS` v `main.js`). Video ju zdaj ima tudi v sliki, zato bi se podvajala.

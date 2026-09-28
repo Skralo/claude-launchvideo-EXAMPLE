@@ -1,17 +1,19 @@
-// The SKRALOVNIK film: the day as a system scanned by a chrome instrument.
-// Base looks (Plate) replace the frame; overlays draw on top in a fixed order; the HUD is last.
+// The SKRALOVNIK film, v2: the day in its own colour, analysed in bursts. The footage stays clean
+// for about 60 % of every shot; the edit (scans, results, strips, flashes) arrives over it in
+// black and white. Base looks (Plate) take the frame; overlays draw on top in a fixed order;
+// the HUD is last.
 import { AbsoluteFill, useCurrentFrame } from 'remotion';
 import { Wipe } from './Chrome';
 import { Fonts } from './Fonts';
 import { Hud } from './Hud';
-import { Lock } from './Lock';
 import { Outro } from './Outro';
-import { Plate, SvgDefs } from './Plate';
-import { Band, Block, Boot, Contour, Globe, Smear, Strip } from './Textures';
+import { Plate, Strips, SvgDefs } from './Plate';
+import { Element, Scan } from './Scan';
+import { Boot, Contour, Strip } from './Textures';
 import { eventsAt, FOOT_END, isBase, lookAt, OverLook } from './timeline';
 import { INK } from './tokens';
 
-const ORDER: OverLook[] = ['boot', 'band', 'bandV', 'strip', 'smear', 'contour', 'globe', 'block', 'lock', 'wipe'];
+const ORDER: OverLook[] = ['boot', 'strips', 'strip', 'contour', 'scan', 'element', 'wipe'];
 
 export const Film: React.FC = () => {
   const o = useCurrentFrame();
@@ -28,22 +30,16 @@ export const Film: React.FC = () => {
           switch (l) {
             case 'boot':
               return <Boot key={e.id} o={o} />;
-            case 'band':
-              return <Band key={e.id} o={o} ev={e} />;
-            case 'bandV':
-              return <Band key={e.id} o={o} ev={e} vertical />;
+            case 'strips':
+              return <Strips key={e.id} o={o} />;
             case 'strip':
               return <Strip key={e.id} o={o} ev={e} />;
-            case 'smear':
-              return <Smear key={e.id} o={o} ev={e} />;
             case 'contour':
               return <Contour key={e.id} o={o} ev={e} />;
-            case 'globe':
-              return <Globe key={e.id} o={o} ev={e} />;
-            case 'block':
-              return <Block key={e.id} />;
-            case 'lock':
-              return <Lock key={e.id} o={o} ev={e} />;
+            case 'scan':
+              return <Scan key={e.id} o={o} ev={e} />;
+            case 'element':
+              return <Element key={e.id} o={o} ev={e} />;
             case 'wipe':
               return <Wipe key={e.id} o={o} ev={e} />;
             default:

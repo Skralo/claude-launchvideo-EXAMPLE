@@ -5,14 +5,15 @@
 //   28    they lock into the SKRALOVNIK symbol (resolve)
 //   29-35 the symbol settles into its place in the logo
 //   32-38 the wordmark resolves from 1-bit noise
-//   39-   hold on the lockup
+//   40-43 the chrome symbol gives way to the flat one from the website's logo.svg
+//   44-   hold on the logo, over the last frame of the day, veiled like the website's hero
 import { Img, staticFile } from 'remotion';
-import { Dither } from './Bits';
+import { Dither, Still } from './Bits';
 import { ChromeStage, Spark } from './Chrome';
 import { FlatSparkle } from './Sparkle';
-import { Label } from './Sys';
+import { Label } from './Label';
 import { CHAPTERS, CUTS, FOOT_END, LOGO } from './timeline';
-import { HAIR, HAIR_FAINT, INK, lerp, PAPER, rnd } from './tokens';
+import { HAIR, HAIR_FAINT, lerp, PAPER, rnd } from './tokens';
 
 const easeInOut = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
 const easeOut = (t: number) => 1 - Math.pow(1 - t, 4);
@@ -71,7 +72,7 @@ const dissolve = (w: number, h: number, p: number, seed: number) => {
 
 export const Outro: React.FC<{ o: number }> = ({ o }) => {
   const r = o - FOOT_END;
-  const bg = r >= 13 ? 'radial-gradient(ellipse 60% 54% at 50% 50%, #20262a 0%, #0e1112 50%, #050607 100%)' : INK;
+  const flat = Math.min(1, Math.max(0, (r - 40) / 4));
 
   // contact sheet + fold
   let sheet: React.ReactNode = null;
@@ -118,9 +119,19 @@ export const Outro: React.FC<{ o: number }> = ({ o }) => {
   const wordP = r < 32 ? 0 : [0.12, 0.28, 0.46, 0.64, 0.8, 0.93, 1][Math.min(6, r - 32)];
 
   return (
-    <div style={{ position: 'absolute', inset: 0, background: bg }}>
+    <div style={{ position: 'absolute', inset: 0 }}>
+      {/* the last frame of the day, held and veiled like the website's hero */}
+      <Still src={CUTS[8] - 1} style={{ filter: `brightness(${r < 13 ? 0.28 : 0.4}) saturate(0.85)` }} />
+      <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse 55% 50% at 50% 50%, rgba(5,6,7,0.35) 0%, rgba(5,6,7,0.6) 100%)' }} />
       {sheet}
-      {r >= 13 && <ChromeStage items={sparks(r)} glow={r === 28 ? 2.2 : r > 34 ? 1.7 : 1.1} />}
+      {r >= 13 && flat < 1 && (
+        <div style={{ position: 'absolute', inset: 0, opacity: 1 - flat }}>
+          <ChromeStage items={sparks(r)} glow={r === 28 ? 2.2 : r > 34 ? 1.7 : 1.1} />
+        </div>
+      )}
+      {flat > 0 && (
+        <Img src={staticFile('skralovnik/logo-symbol.svg')} style={{ position: 'absolute', left: LOGO_BOX.x, top: LOGO_BOX.y, width: LOGO_BOX.w, height: LOGO_BOX.h, opacity: flat }} />
+      )}
       {lockR && (
         <svg width={1920} height={1080} style={{ position: 'absolute', left: 0, top: 0 }}>
           <circle cx={FORM.cx} cy={FORM.cy} r={ringR} fill="none" stroke={PAPER} strokeOpacity={1 - (r - 28) / 4} strokeWidth={1.5} />
@@ -134,16 +145,6 @@ export const Outro: React.FC<{ o: number }> = ({ o }) => {
       )}
       {r === 28 && <FlatSparkle x={FORM.cx} y={FORM.cy} size={400} color={PAPER} opacity={0.75} />}
       {r === 29 && <FlatSparkle x={FORM.cx} y={FORM.cy} size={180} color={PAPER} opacity={0.6} />}
-      {/* glints travelling round the held symbol's tips */}
-      {[41, 42, 51, 52].includes(r) && (
-        <FlatSparkle
-          x={SYM.cx + (r < 50 ? 0.5 : -0.5) * SYM.w}
-          y={SYM.cy + (r < 50 ? -0.02 : 0.02) * SYM.h}
-          size={r % 2 ? 26 : 64}
-          color={PAPER}
-          opacity={0.9}
-        />
-      )}
       {wordP > 0 && (
         <div
           style={{

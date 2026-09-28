@@ -5,17 +5,21 @@ SKRALOVNIK film: plate preparation.
 public/skralovnik/source.mp4 (4K, 30 fps, 8 shots, 242 frames) becomes everything the picture
 needs, per source frame:
 
-  public/skralovnik/plate/bw/NNNN.jpg    1920x1080 silver grade (teal-black shadows, paper highlights)
-  public/skralovnik/plate/col/NNNN.jpg   1920x1080 colour, contrast-matched (colour flashes)
-  public/skralovnik/plate/d4/NNNN.png    480x270 1-bit dither (full-frame dither, large tiles)
+  public/skralovnik/plate/org/NNNN.jpg   1920x1080, the footage in its own colour (a light sharpen only)
+  public/skralovnik/plate/d4/NNNN.png    480x270 1-bit dither (full-frame 1-bit flashes, large tiles)
   public/skralovnik/plate/d8/NNNN.png    240x135 1-bit dither (small tiles)
   public/skralovnik/track.json           per-frame lock box and subject contour (committed)
+
+and, from the overlay elements in public/skralovnik/elements/src/ (Anže's cut-outs):
+
+  public/skralovnik/elements/NAME.png, NAME-ink.png, NAME-bit.png, NAME-bit-ink.png
+      trimmed to their alpha; white as drawn, inverted to ink for bright shots, and 1-bit versions
 
 The lock boxes come from MediaPipe pose landmarks (the ring in the typing shot is followed with
 optical flow instead, because hands on a keyboard are not a pose). Contours come from two person
 segmenters (selfie multiclass + DeepLab person), maxed. Models download on first run.
 
-Usage: python3 scripts/skralovnik/prep.py [--skip-track]
+Usage: python3 scripts/skralovnik/prep.py [--skip-track] [--elements]
 """
 import json
 import os
@@ -44,12 +48,6 @@ MODEL_URLS = {
     'selfie_mc.tflite': 'https://storage.googleapis.com/mediapipe-models/image_segmenter/selfie_multiclass_256x256/float32/latest/selfie_multiclass_256x256.tflite',
     'deeplab.tflite': 'https://storage.googleapis.com/mediapipe-models/image_segmenter/deeplab_v3/float32/latest/deeplab_v3.tflite',
 }
-
-# Duotone ends: shadows sit in the brand's teal-black (symbol.svg #00202d, darkened),
-# highlights on the website's paper white (#f4f1ea).
-SHADOW = np.array([3, 13, 17], np.float32) / 255.0
-PAPER = np.array([244, 241, 234], np.float32) / 255.0
-
 
 def shot_of(f):
     for s in range(8):
@@ -90,8 +88,8 @@ def s_curve(y, k=5.5, pivot=0.46):
     return (1 / (1 + np.exp(-k * (y - pivot))) - lo) / (hi - lo)
 
 
-# Per shot: black point / white point percentiles and a gamma, set by eye so every shot lands on
-# the same silver: deep blacks, a few clipped whites, faces in the upper mids.
+# Per shot: black point / white point percentiles and a gamma for the luminance the 1-bit plates
+# are dithered from, set by eye so every shot dithers alike: deep blacks, faces in the upper mids.
 SHOT_GRADE = [
     dict(lo=0.5, hi=99.7, gamma=0.92, k=6.0),   # 1 present: dark set, keep it low-key
     dict(lo=1.0, hi=99.0, gamma=1.05, k=5.5),   # 2 build: bright warm desk
@@ -129,31 +127,12 @@ def grade_luma(bgr, s, levels):
     return np.clip(y, 0, 1)
 
 
-def duotone(y):
-    t = y[..., None]
-    rgb = SHADOW * (1 - t) + PAPER * t
-    return (np.clip(rgb[..., ::-1], 0, 1) * 255 + 0.5).astype(np.uint8)  # to BGR
-
-
-def heat_mask(bgr):
-    """Where the sauna's LED strip glows: saturated orange-red."""
-    hsv = cv2.cvtColor(bgr, cv2.COLOR_BGR2HSV).astype(np.float32)
-    h, sat, v = hsv[..., 0] * 2, hsv[..., 1] / 255, hsv[..., 2] / 255
-    hue = np.clip(1 - np.minimum(np.abs(h - 18), np.abs(h - 378)) / 22, 0, 1)
-    m = hue * np.clip((sat - 0.45) / 0.35, 0, 1) * np.clip((v - 0.25) / 0.4, 0, 1)
-    return cv2.GaussianBlur(m, (0, 0), 3)
-
-
-def colour(bgr, s, levels):
-    """Colour plate: same levels as the silver grade, a little extra saturation."""
-    g = SHOT_GRADE[s]
-    lo, hi = levels[s]
-    x = bgr.astype(np.float32) / 255.0
-    x = np.clip((x - lo) / max(hi - lo, 1e-3), 0, 1) ** g['gamma']
-    x = s_curve(x, g['k'] * 0.8)
-    hsv = cv2.cvtColor((x * 255).astype(np.uint8), cv2.COLOR_BGR2HSV).astype(np.float32)
-    hsv[..., 1] = np.clip(hsv[..., 1] * 1.15, 0, 255)
-    return cv2.cvtColor(hsv.astype(np.uint8), cv2.COLOR_HSV2BGR)
+def original(bgr):
+    """The footage as it is: its own colour and levels, only a light sharpen after the 4K -> 1080p
+    downscale."""
+    x = bgr.astype(np.float32)
+    x = x + 0.35 * (x - cv2.GaussianBlur(x, (0, 0), 1.0))
+    return np.clip(x, 0, 255).astype(np.uint8)
 
 
 def dither(y, size):
@@ -162,21 +141,14 @@ def dither(y, size):
 
 
 def build_plates(frames_dir):
-    for sub in ('bw', 'col', 'd4', 'd8'):
+    for sub in ('org', 'd4', 'd8'):
         os.makedirs(os.path.join(PLATE, sub), exist_ok=True)
     levels = shot_levels(frames_dir)
     for f in range(N):
         s = shot_of(f)
         bgr = load(frames_dir, f)
         y = grade_luma(bgr, s, levels)
-        bw = duotone(y)
-        col = colour(bgr, s, levels)
-        if s == 6:
-            # RECOVER keeps its heat: the one colour accent of the film
-            m = heat_mask(bgr)[..., None]
-            bw = (bw * (1 - m) + col * m).astype(np.uint8)
-        cv2.imwrite(os.path.join(PLATE, 'bw', f'{f:04d}.jpg'), bw, [cv2.IMWRITE_JPEG_QUALITY, 94])
-        cv2.imwrite(os.path.join(PLATE, 'col', f'{f:04d}.jpg'), col, [cv2.IMWRITE_JPEG_QUALITY, 92])
+        cv2.imwrite(os.path.join(PLATE, 'org', f'{f:04d}.jpg'), original(bgr), [cv2.IMWRITE_JPEG_QUALITY, 94])
         dither(y, (480, 270)).save(os.path.join(PLATE, 'd4', f'{f:04d}.png'))
         dither(y, (240, 135)).save(os.path.join(PLATE, 'd8', f'{f:04d}.png'))
         if f % 40 == 0:
@@ -347,48 +319,46 @@ def build_track(frames_dir):
 
 
 # ---------------------------------------------------------------------------------------
-# punch-ins
+# overlay elements
 # ---------------------------------------------------------------------------------------
-def build_punch(frames_dir):
-    """Punch-in frames are cut from the 4K source (not blown up from the 1080p plate), centred on
-    the lock box, then graded like the rest of their shot. Needs out/skralovnik/timeline.json
-    (scripts/skralovnik/export-cues.ts) and public/skralovnik/track.json."""
-    tl = json.load(open(os.path.join(WORK, 'timeline.json')))
-    track = json.load(open(os.path.join(PUB, 'track.json')))['frames']
-    want = {}
-    for e in tl['events']:
-        if e['look'] == 'punch':
-            want[e['o'] - tl['pre']] = e
-    os.makedirs(os.path.join(PLATE, 'punch'), exist_ok=True)
-    levels = shot_levels(frames_dir)
-    cap = cv2.VideoCapture(SRC)
-    f = 0
-    while want:
-        ok, big = cap.read()
-        if not ok:
-            break
-        if f in want:
-            e = want.pop(f)
-            p = e.get('p') or {}
-            z = float(p.get('zoom', 2))
-            cx, cy, w, h = track[f]['box']
-            cy += float(p.get('dy', 0)) * h
-            sx, sy = big.shape[1] / W, big.shape[0] / H
-            cw, ch = big.shape[1] / z, big.shape[0] / z
-            x0 = int(round(min(max(cx * sx - cw / 2, 0), big.shape[1] - cw)))
-            y0 = int(round(min(max(cy * sy - ch / 2, 0), big.shape[0] - ch)))
-            crop = cv2.resize(big[y0:y0 + int(ch), x0:x0 + int(cw)], (W, H), interpolation=cv2.INTER_LANCZOS4)
-            y = grade_luma(crop, shot_of(f), levels)
-            cv2.imwrite(os.path.join(PLATE, 'punch', f"{e['id']}.jpg"), duotone(y), [cv2.IMWRITE_JPEG_QUALITY, 94])
-            print(f"  punch {e['id']} (source frame {f}, x{z})")
-        f += 1
+ELEMENTS = ('brain', 'eagle', 'cheetah', 'figures', 'eye')
+
+
+def build_elements(max_side=640):
+    """Each cut-out trimmed to its alpha and scaled to max_side, in four versions: as drawn (white,
+    for dark shots), inverted to ink (bright shots), and 1-bit versions of both (the flash frames)."""
+    src_dir = os.path.join(PUB, 'elements', 'src')
+    out_dir = os.path.join(PUB, 'elements')
+    sizes = {}
+    for name in ELEMENTS:
+        im = Image.open(os.path.join(src_dir, f'{name}.webp')).convert('RGBA')
+        a = np.array(im)
+        ys, xs = np.nonzero(a[..., 3] > 8)
+        a = a[ys.min():ys.max() + 1, xs.min():xs.max() + 1]
+        k = max_side / max(a.shape[:2])
+        a = cv2.resize(a, (round(a.shape[1] * k), round(a.shape[0] * k)), interpolation=cv2.INTER_AREA)
+        rgb, alpha = a[..., :3], a[..., 3]
+        ink = 255 - rgb
+        lum = cv2.cvtColor(rgb, cv2.COLOR_RGB2GRAY)
+        bits = np.array(Image.fromarray(lum, 'L').convert('1').convert('L'))
+        solid = np.where(alpha > 96, 255, 0).astype(np.uint8)
+        for suffix, px, al in (('', rgb, alpha), ('-ink', ink, alpha),
+                               ('-bit', np.repeat(bits[..., None], 3, 2), np.minimum(solid, bits)),
+                               ('-bit-ink', np.repeat(255 - bits[..., None], 3, 2), np.minimum(solid, bits))):
+            Image.fromarray(np.dstack([px, al]).astype(np.uint8), 'RGBA').save(os.path.join(out_dir, f'{name}{suffix}.png'))
+        sizes[name] = [int(a.shape[1]), int(a.shape[0])]
+        print(f'  element {name} {sizes[name]}')
+    with open(os.path.join(out_dir, 'sizes.json'), 'w') as fh:
+        json.dump(sizes, fh)
 
 
 if __name__ == '__main__':
-    frames_dir = extract_frames()
-    if '--punch' in sys.argv:
-        build_punch(frames_dir)
+    if '--elements' in sys.argv:
+        build_elements()
         sys.exit(0)
+    frames_dir = extract_frames()
+    print('elements')
+    build_elements()
     print('plates')
     build_plates(frames_dir)
     if '--skip-track' not in sys.argv:

@@ -1,24 +1,26 @@
-# SKRALOVNIK — personal film (v1)
+# SKRALOVNIK — personal film (v2)
 
 Anže's 8-second personal landing video (8 shots, 4K, 30 fps), rebuilt as a 10-second motion-design
-piece: Y2K chrome, hard black-and-white contrast, fine technical graphics and a tech-glitch edit,
-scored with SFX only (the camera sound is removed). It is built with the same tools as the Tessel
-film below: the picture in Remotion, the sound synthesized in Python, both reading one timeline.
+piece and scored with SFX only (the camera sound is removed). It is built with the same tools as the
+Tessel film below: the picture in Remotion, the sound synthesized in Python, both reading one timeline.
 
-[![SKRALOVNIK film v1](video/skralovnik-v1-sheet.jpg)](video/skralovnik-v1.mp4)
+[![SKRALOVNIK film v2](video/skralovnik-v2-sheet.jpg)](video/skralovnik-v2.mp4)
 
-**Watch:** [`video/skralovnik-v1.mp4`](video/skralovnik-v1.mp4) (master, 1920×1080, 30 fps, AAC 320 kb/s) ·
-[`video/skralovnik-v1-web.mp4`](video/skralovnik-v1-web.mp4) (8 Mb/s, for the website).
+**Watch:** [`video/skralovnik-v2.mp4`](video/skralovnik-v2.mp4) (master, 1920×1080, 30 fps, AAC 320 kb/s) ·
+[`video/skralovnik-v2-web.mp4`](video/skralovnik-v2-web.mp4) (8 Mb/s, for the website).
+v1 (black-and-white, denser) stays in `video/skralovnik-v1*.mp4` for comparison.
 
-**The idea.** The day is a system being scanned by a chrome instrument. The eight chapters from the
-website (Present · Build · Train · Build · Run · Team · Recover · Repeat) keep their cuts, and each
-shot gets the same grammar: a transition hit on the cut, brackets that lock onto the subject
-(tracked with pose landmarks, the ring with optical flow), one- and two-frame interruptions
-(x-ray negative, a 4K punch-in, a 1-bit frame, the chapter word too big for the frame, a frame of
-real colour, a system frame), and one texture that travels (scan band, film strip, smear, contour,
-a wireframe globe set inside the pendant lamp). The brand sparkle is a real 3D chrome object: it
-wipes two cuts by swelling through the lens and, at the end, four of them lock into the SKRALOVNIK
-symbol above the wordmark from `logo.svg`. The only colour is the sauna's heat.
+**The idea.** The day in its own colour, analysed in bursts. The eight chapters from the website
+(Present · Build · Train · Build · Run · Team · Recover · Repeat) keep their cuts and their speed,
+and every shot stays clean for about 60 % of its frames. The edit arrives over the footage in black
+and white: a circular scan in thin lines finds the subject (tracked with pose landmarks, the ring
+with optical flow), locks, and its result flashes beside it for four frames: one of Anže's cut-outs
+(brain for Present, eagle for Train and Repeat, cheetah for Run, three figures for Team, the eye for
+Recover), 1-bit, clean, clean, 1-bit, white on the dark shots and ink on the bright ones. Only four
+looks ever take the whole frame, for a frame or two: the negative, a 1-bit frame, the chapter word
+over the moving footage, and the chrome sparkle that wipes two cuts. At the end four chrome
+sparkles lock into the SKRALOVNIK symbol, which then settles into the flat logo from `logo.svg`,
+over the last frame of the day veiled like the website's hero.
 
 **Sound.** An original SFX palette built in rounds, no samples, no tonal beeps, sweeps, bells,
 drums or reverb. Round 1 ([`sfx/skralovnik/round1/`](sfx/skralovnik/round1/)) tested three dry
@@ -30,10 +32,10 @@ individual 48 kHz / 24-bit WAVs and QC (peaks, clean endings, mono compatibility
 
 **Checks on every render** (`scripts/skralovnik/post.py`): audio sync to the sample, true peak after
 the AAC encode at or under −1 dBTP, and a flash scan (at most 2 full-frame luminance flashes in any
-second; WCAG 2.3.1 allows 3).
+second; WCAG 2.3.1 allows 3; v2 peaks at 1).
 
 ```bash
-npm run skralovnik   # plates → timeline → 4K punch-ins → SFX → frames → grain + master + checks
+npm run skralovnik   # plates + elements → timeline → SFX → frames → grain + master + checks
 ```
 
 Needs `ffmpeg` (with libx264) on the PATH and Python with
@@ -41,11 +43,11 @@ Needs `ffmpeg` (with libx264) on the PATH and Python with
 `public/skralovnik/track.json` is deleted and tracking has to run again).
 
 ```
-src/skralovnik/        timeline.ts (events → looks and cues), Film, Plate, Sys, Hud, Lock,
-                       Textures, Chrome (Three.js sparkle), Outro
-scripts/skralovnik/    prep.py (grade, dither, tracking, punch-ins), export-cues.ts, sfx.py,
+src/skralovnik/        timeline.ts (events → looks and cues), Film, Plate, Scan (scan + result),
+                       Hud, Textures, Chrome (Three.js sparkle), Outro, Label
+scripts/skralovnik/    prep.py (colour + 1-bit plates, elements, tracking), export-cues.ts, sfx.py,
                        post.py, render.sh
-public/skralovnik/     source footage, logo / symbol / wordmark SVGs, track.json
+public/skralovnik/     source footage, logo / symbol / wordmark SVGs, track.json, elements/
 sfx/skralovnik/        SFX round 1 deliverables
 ```
 

@@ -4,8 +4,9 @@ import { PAPER, plate } from './tokens';
 
 export const full: React.CSSProperties = { position: 'absolute', left: 0, top: 0, width: W, height: H };
 
-export const Still: React.FC<{ kind?: 'bw' | 'col'; src: number; style?: React.CSSProperties }> = ({ kind = 'bw', src, style }) => (
-  <Img src={plate(kind, src)} style={{ ...full, ...style }} />
+/** The footage frame in its own colour. */
+export const Still: React.FC<{ src: number; style?: React.CSSProperties }> = ({ src, style }) => (
+  <Img src={plate('org', src)} style={{ ...full, ...style }} />
 );
 
 /** A 1-bit frame, paper on ink, scaled by whole pixels so every dither dot stays square. */

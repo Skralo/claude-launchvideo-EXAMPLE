@@ -29,16 +29,19 @@ export const srcAt = (o: number) => Math.max(0, Math.min(CUTS[8] - 1, o - PRE));
 // Events
 // ---------------------------------------------------------------------------------------
 // fn is the event's job, which is what the sound design maps:
-//   micro      a 1-2 frame interruption inside a shot
+//   micro      a 1-4 frame interruption inside a shot (a flash, a result, the chapter word)
 //   transition the hit on a cut
-//   lock       the brackets lock onto the subject
-//   texture    something textural travels (scan band, smear, strip, contour, chrome travel)
+//   lock       a scan locks onto the subject
+//   texture    something textural travels (film strip, contour trace, chrome travel)
 //   resolve    the logo locks
 export type Fn = 'micro' | 'transition' | 'lock' | 'texture' | 'resolve';
 
-// Base looks replace the whole frame; the rest are drawn over it.
-export type BaseLook = 'neg' | 'dit' | 'col' | 'punch' | 'type' | 'typeInv' | 'sys' | 'chrome' | 'slice' | 'black';
-export type OverLook = 'boot' | 'wipe' | 'band' | 'bandV' | 'strip' | 'smear' | 'contour' | 'globe' | 'lock' | 'block' | 'recap' | 'collapse' | 'converge' | 'lockup' | 'wordmark';
+// v2 (feedback on v1): the footage stays as it is, in its own colour and speed, and is clean for
+// about 60 % of every shot. The edit arrives in bursts over it, black and white. Only four looks
+// may take the whole frame for a frame or two: negative, 1-bit, the chapter word over the
+// footage, and the chrome sparkle on a cut. Everything else is an overlay.
+export type BaseLook = 'neg' | 'dit' | 'type';
+export type OverLook = 'boot' | 'wipe' | 'strips' | 'strip' | 'contour' | 'scan' | 'element' | 'recap' | 'collapse' | 'converge' | 'lockup' | 'wordmark' | 'flat';
 export type Look = BaseLook | OverLook;
 
 export type Ev = {
@@ -57,73 +60,68 @@ export type Ev = {
   p?: Record<string, number | string>;
 };
 
-const BASE: ReadonlySet<string> = new Set(['neg', 'dit', 'col', 'punch', 'type', 'typeInv', 'sys', 'chrome', 'slice', 'black']);
+const BASE: ReadonlySet<string> = new Set(['neg', 'dit', 'type']);
 export const isBase = (l: Look): l is BaseLook => BASE.has(l);
 
+/** Overlay tone per shot: paper (white) lines on the dark shots, ink (black) on the bright ones. */
+export const TONE: ('paper' | 'ink')[] = ['paper', 'ink', 'ink', 'ink', 'ink', 'ink', 'paper', 'paper'];
+
 const s = shotStart;
-const lockAt = (k: number, r = 7) => s(k) + r;
+/** A scan around the subject; it locks (the sound) on its last frame, then its result flashes. */
+const scan = (id: string, k: number, at: number, dur: number, note: string, result: string): Ev[] => [
+  { id: `${id}-scan`, o: s(k) + at, dur, hit: s(k) + at + dur - 1, fn: 'lock', look: 'scan', shot: k, note, p: { label: result } },
+];
+const element = (id: string, k: number, at: number, el: string, label: string, note: string, side?: number): Ev => ({
+  id: `${id}-el`, o: s(k) + at, dur: 4, fn: 'micro', look: 'element', shot: k, note, p: side === undefined ? { el, label } : { el, label, side },
+});
 
 export const EVENTS: Ev[] = [
   // Boot ------------------------------------------------------------------------------
-  { id: 'boot', o: 0, dur: 4, fn: 'texture', look: 'boot', shot: -1, note: 'hairline frame draws in from the corners, brand line types on' },
-  { id: 'boot-sys', o: 4, dur: 1, fn: 'micro', look: 'sys', shot: -1, note: 'system frame: the first tile of PRESENT', p: { variant: 'tile', src: 0 } },
+  { id: 'boot', o: 0, dur: 5, fn: 'texture', look: 'boot', shot: -1, note: 'hairlines draw in from the corners around a glint' },
   { id: 'boot-dit', o: 5, dur: 1, fn: 'micro', look: 'dit', shot: -1, note: '1-bit frame of PRESENT', p: { src: 0 } },
 
-  // 1 Present -------------------------------------------------------------------------
-  { id: 'p-in', o: s(0), dur: 1, fn: 'transition', look: 'neg', shot: 0, note: 'cut in on the x-ray negative' },
-  { id: 'p-lock', o: lockAt(0), dur: 20, fn: 'lock', look: 'lock', shot: 0, note: 'brackets lock onto the face', p: { ring: 1 } },
-  { id: 'p-punch', o: s(0) + 11, dur: 1, fn: 'micro', look: 'punch', shot: 0, note: 'punch-in on the eyes', p: { zoom: 2.4, dy: -0.18 } },
-  { id: 'p-band', o: s(0) + 16, dur: 5, fn: 'texture', look: 'band', shot: 0, note: '1-bit scan band sweeps down' },
-  { id: 'p-type', o: s(0) + 25, dur: 1, fn: 'micro', look: 'type', shot: 0, note: 'PRESENT, too big for the frame' },
+  // 1 Present: the mind ----------------------------------------------------------------
+  { id: 'p-in', o: s(0), dur: 2, fn: 'transition', look: 'strips', shot: 0, note: 'thin glitch strips knock the first shot in' },
+  ...scan('p', 0, 3, 6, 'circular scan of the face', '[MIND]'),
+  element('p', 0, 9, 'brain', '[MIND]', 'result: the brain flashes beside the scan'),
+  { id: 'p-type', o: s(0) + 23, dur: 1, fn: 'micro', look: 'type', shot: 0, note: 'PRESENT over the footage, too big for the frame' },
 
-  // 2 Build (typing) ------------------------------------------------------------------
-  { id: 'b1-in', o: s(1), dur: 2, fn: 'transition', look: 'slice', shot: 1, note: 'sliced glitch entry' },
-  { id: 'b1-lock', o: lockAt(1), dur: 18, fn: 'lock', look: 'lock', shot: 1, note: 'brackets lock onto the ring' },
-  { id: 'b1-macro', o: s(1) + 11, dur: 1, fn: 'micro', look: 'punch', shot: 1, note: 'macro on the meander ring', p: { zoom: 3.4 } },
-  { id: 'b1-strip', o: s(1) + 15, dur: 5, fn: 'texture', look: 'strip', shot: 1, note: 'film strip of the last frames rolls up the right edge' },
-  { id: 'b1-col', o: s(1) + 24, dur: 1, fn: 'micro', look: 'col', shot: 1, note: 'one frame of real colour' },
+  // 2 Build (typing) --------------------------------------------------------------------
+  { id: 'b1-in', o: s(1), dur: 1, fn: 'transition', look: 'neg', shot: 1, note: 'cut in on the negative' },
+  ...scan('b1', 1, 4, 6, 'small scan of the meander ring', '[FOCUS]'),
+  { id: 'b1-strip', o: s(1) + 14, dur: 4, fn: 'texture', look: 'strip', shot: 1, note: 'film strip of the last frames rolls up the right edge' },
 
-  // 3 Train ---------------------------------------------------------------------------
+  // 3 Train: strength --------------------------------------------------------------------
   { id: 't-in', o: s(2) - 2, dur: 4, hit: s(2), fn: 'transition', look: 'wipe', shot: 2, note: 'chrome sparkle swells through the lens and wipes to TRAIN' },
-  { id: 't-lock', o: lockAt(2, 8), dur: 19, fn: 'lock', look: 'lock', shot: 2, note: 'brackets lock onto the head on the bar' },
-  { id: 't-type', o: s(2) + 12, dur: 1, fn: 'micro', look: 'typeInv', shot: 2, note: 'TRAIN in ink on paper' },
-  { id: 't-band', o: s(2) + 17, dur: 5, fn: 'texture', look: 'bandV', shot: 2, note: '1-bit scan band sweeps left to right' },
-  { id: 't-dit', o: s(2) + 26, dur: 1, fn: 'micro', look: 'dit', shot: 2, note: 'one 1-bit frame' },
+  ...scan('t', 2, 4, 6, 'scan of the head on the bar', '[STRENGTH]'),
+  element('t', 2, 10, 'eagle', '[STRENGTH]', 'result: the eagle flashes beside the scan'),
 
-  // 4 Build (notebook) ----------------------------------------------------------------
-  { id: 'b2-in', o: s(3), dur: 2, fn: 'transition', look: ['dit', 'block'], shot: 3, note: 'arrives as 1-bit, a paper block knocks it into place' },
-  { id: 'b2-lock', o: lockAt(3), dur: 21, fn: 'lock', look: 'lock', shot: 3, note: 'brackets lock onto the face over the notebook', p: { ring: 1 } },
-  { id: 'b2-sys', o: s(3) + 11, dur: 2, fn: 'micro', look: 'sys', shot: 3, note: 'system frame: both BUILD shots side by side', p: { variant: 'pair' } },
-  { id: 'b2-contour', o: s(3) + 16, dur: 6, fn: 'texture', look: 'contour', shot: 3, note: 'the silhouette traces itself in hairline' },
-  { id: 'b2-neg', o: s(3) + 27, dur: 1, fn: 'micro', look: 'neg', shot: 3, note: 'x-ray negative' },
+  // 4 Build (notebook) --------------------------------------------------------------------
+  { id: 'b2-in', o: s(3), dur: 1, fn: 'transition', look: 'dit', shot: 3, note: 'cut in on a 1-bit frame' },
+  ...scan('b2', 3, 4, 6, 'scan of the face over the notebook', '[PLAN]'),
+  { id: 'b2-contour', o: s(3) + 11, dur: 4, fn: 'texture', look: 'contour', shot: 3, note: 'the silhouette traces itself in hairline' },
 
-  // 5 Run -----------------------------------------------------------------------------
-  { id: 'r-in', o: s(4), dur: 2, fn: 'transition', look: ['sys', 'slice'], shot: 4, note: 'system strip, then a sliced entry', p: { variant: 'strip' } },
-  { id: 'r-lock', o: lockAt(4, 6), dur: 21, fn: 'lock', look: 'lock', shot: 4, note: 'brackets lock onto the runner\'s head', p: { ring: 1 } },
-  { id: 'r-chrome', o: s(4) + 11, dur: 1, fn: 'micro', look: 'chrome', shot: 4, note: 'full-frame chrome sparkle' },
-  { id: 'r-smear', o: s(4) + 15, dur: 6, fn: 'texture', look: 'smear', shot: 4, note: 'the stride smears into horizontal streaks' },
-  { id: 'r-type', o: s(4) + 25, dur: 1, fn: 'micro', look: 'type', shot: 4, note: 'RUN, too big for the frame' },
+  // 5 Run: speed ---------------------------------------------------------------------------
+  { id: 'r-in', o: s(4), dur: 2, fn: 'transition', look: 'strips', shot: 4, note: 'thin glitch strips' },
+  ...scan('r', 4, 3, 6, "scan of the runner's head", '[SPEED]'),
+  element('r', 4, 9, 'cheetah', '[SPEED]', 'result: the cheetah flashes ahead of the runner', 1),
+  { id: 'r-type', o: s(4) + 24, dur: 1, fn: 'micro', look: 'type', shot: 4, note: 'RUN over the footage, too big for the frame' },
 
-  // 6 Team ----------------------------------------------------------------------------
-  { id: 'tm-in', o: s(5), dur: 2, fn: 'transition', look: ['neg', 'col'], shot: 5, note: 'negative, colour, then silver' },
-  { id: 'tm-lock', o: lockAt(5), dur: 18, fn: 'lock', look: 'lock', shot: 5, note: 'brackets lock onto both of them' },
-  { id: 'tm-punch', o: s(5) + 11, dur: 1, fn: 'micro', look: 'punch', shot: 5, note: 'punch-in on the table', p: { zoom: 2.2 } },
-  { id: 'tm-globe', o: s(5) + 14, dur: 7, fn: 'texture', look: 'globe', shot: 5, note: 'a wireframe globe turns inside the pendant lamp' },
-  { id: 'tm-sys', o: s(5) + 24, dur: 1, fn: 'micro', look: 'sys', shot: 5, note: 'system frame: the team tile', p: { variant: 'tile' } },
+  // 6 Team -------------------------------------------------------------------------------
+  { id: 'tm-in', o: s(5), dur: 1, fn: 'transition', look: 'neg', shot: 5, note: 'cut in on the negative' },
+  ...scan('tm', 5, 3, 6, 'scan of the two of them', '[TEAM]'),
+  element('tm', 5, 9, 'figures', '[TEAM]', 'result: three figures flash beside the scan'),
 
-  // 7 Recover -------------------------------------------------------------------------
-  { id: 'rc-in', o: s(6), dur: 1, fn: 'transition', look: 'black', shot: 6, note: 'one frame of black, only the instruments' },
-  { id: 'rc-lock', o: lockAt(6, 8), dur: 22, fn: 'lock', look: 'lock', shot: 6, note: 'brackets lock onto the silhouette' },
-  { id: 'rc-col', o: s(6) + 12, dur: 1, fn: 'micro', look: 'col', shot: 6, note: 'the sauna in full colour' },
-  { id: 'rc-band', o: s(6) + 16, dur: 6, fn: 'texture', look: 'band', shot: 6, note: 'heat scan band rises', p: { up: 1 } },
-  { id: 'rc-neg', o: s(6) + 28, dur: 1, fn: 'micro', look: 'neg', shot: 6, note: 'x-ray negative of the heat' },
+  // 7 Recover: insight -------------------------------------------------------------------
+  { id: 'rc-in', o: s(6), dur: 1, fn: 'transition', look: 'dit', shot: 6, note: 'cut in on a 1-bit frame' },
+  ...scan('rc', 6, 5, 6, 'scan of the silhouette in the sauna', '[INSIGHT]'),
+  element('rc', 6, 11, 'eye', '[INSIGHT]', 'result: the eye flashes above the silhouette'),
+  { id: 'rc-neg', o: s(6) + 26, dur: 1, fn: 'micro', look: 'neg', shot: 6, note: 'negative of the heat' },
 
-  // 8 Repeat --------------------------------------------------------------------------
+  // 8 Repeat: rise -------------------------------------------------------------------------
   { id: 'rp-in', o: s(7) - 2, dur: 4, hit: s(7), fn: 'transition', look: 'wipe', shot: 7, note: 'chrome sparkle wipes to REPEAT' },
-  { id: 'rp-lock', o: lockAt(7, 8), dur: 16, fn: 'lock', look: 'lock', shot: 7, note: 'brackets lock onto the lift as the camera pulls back', p: { ring: 1 } },
-  { id: 'rp-type', o: s(7) + 12, dur: 1, fn: 'micro', look: 'typeInv', shot: 7, note: 'REPEAT in ink on paper' },
-  { id: 'rp-strip', o: s(7) + 15, dur: 5, fn: 'texture', look: 'strip', shot: 7, note: 'film strip rolls up the right edge' },
-  { id: 'rp-slice', o: s(7) + 24, dur: 1, fn: 'micro', look: 'slice', shot: 7, note: 'sliced glitch' },
+  ...scan('rp', 7, 4, 5, 'scan of the lift as the camera pulls back', '[RISE]'),
+  element('rp', 7, 9, 'eagle', '[RISE]', 'result: the eagle returns'),
 
   // Outro: the day again, then the mark ----------------------------------------------
   ...Array.from({ length: 8 }, (_, k): Ev => ({
@@ -134,22 +132,21 @@ export const EVENTS: Ev[] = [
   { id: 'converge', o: FOOT_END + 13, dur: 15, hit: FOOT_END + 14, fn: 'texture', look: 'converge', shot: 8, note: 'four chrome sparkles fly in from the corners' },
   { id: 'lockup', o: FOOT_END + 28, dur: 1, fn: 'resolve', look: 'lockup', shot: 8, note: 'the sparkles lock into the SKRALOVNIK symbol' },
   { id: 'wordmark', o: FOOT_END + 32, dur: 7, fn: 'texture', look: 'wordmark', shot: 8, note: 'the wordmark resolves from 1-bit noise' },
+  { id: 'flat', o: FOOT_END + 40, dur: 4, fn: 'texture', look: 'flat', shot: 8, note: 'the chrome symbol settles into the flat logo from the website' },
 ];
 
 /** Frame index inside a multi-frame look array. */
 export const lookAt = (e: Ev, o: number): Look => (Array.isArray(e.look) ? e.look[Math.min(o - e.o, e.look.length - 1)] : e.look);
 
-export const eventsAt = (o: number) => EVENTS.filter((e) => o >= e.o - (e.look === 'lock' ? 3 : 0) && o < e.o + e.dur);
+export const eventsAt = (o: number) => EVENTS.filter((e) => o >= e.o && o < e.o + e.dur);
 
-export const baseAt = (o: number): { look: BaseLook | 'bw'; ev?: Ev } => {
+export const baseAt = (o: number): { look: BaseLook | 'org'; ev?: Ev } => {
   for (const e of eventsAt(o)) {
     const l = lookAt(e, o);
     if (isBase(l)) return { look: l, ev: e };
   }
-  return { look: 'bw' };
+  return { look: 'org' };
 };
-
-export const lockEventOf = (k: number) => EVENTS.find((e) => e.shot === k && e.fn === 'lock');
 
 /** Where the outro's logo sits (1920x1080 px). logo.svg is 266x116 in its own units. */
 export const LOGO = { width: 1040, cx: 960, cy: 540 };

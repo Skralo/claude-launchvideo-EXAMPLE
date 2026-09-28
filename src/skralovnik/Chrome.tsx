@@ -6,7 +6,6 @@
 import { ThreeCanvas } from '@remotion/three';
 import * as THREE from 'three';
 import { Ev, H, W } from './timeline';
-import { INK } from './tokens';
 import { boxAt } from './track';
 
 const SEG: number[][][] = [
@@ -158,10 +157,3 @@ export const Wipe: React.FC<{ o: number; ev: Ev }> = ({ o, ev }) => {
   ];
   return <ChromeStage items={[steps[Math.min(i, 3)]]} glow={i === 2 ? 0 : 1} />;
 };
-
-/** Micro-cut: one full frame of chrome on black. */
-export const ChromeFrame: React.FC<{ o: number }> = () => (
-  <div style={{ position: 'absolute', inset: 0, background: INK }}>
-    <ChromeStage items={[{ x: 960, y: 540, size: 860, rx: 0.3, ry: -0.38, rz: 0.22 }]} glow={1.4} />
-  </div>
-);

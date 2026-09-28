@@ -1,59 +1,61 @@
 # SKRALOVNIK film: SFX cue sheet (round 2)
 
-Round 1 feedback: A works but repeats too often; B works, wants more metal and spring; C works; overall too many sounds and one pattern repeating through the film. Round 2: families of variants, a pattern per scene, 31 sounds on 29 of 55 picture events, tiers soft -10.0 dB, mid -4.5 dB, strong +0.0 dB.
+Round 1 feedback: A works but repeats too often; B works, wants more metal and spring; C works; overall too many sounds and one pattern repeating through the film. Round 2: families of variants, a pattern per scene, 33 sounds on 31 of 42 picture events, tiers soft -10.0 dB, mid -4.5 dB, strong +0.0 dB.
 
-Picture used for this round: v1 (the v2 picture changes events; the plan moves with it).
+Picture: v2 (footage in its own colour, the edit in bursts: scan, result, flashes).
 
 ## Patterns per scene
 
 | Scene | Pattern |
 |---|---|
 | Boot | one soft grain as the system wakes |
-| Present | hard entry: the strongest cut of the film, a soft lock, one scan |
-| Build (ring) | mechanical detail: a soft slice, a metal lock on the ring |
-| Train | chrome: a swell into a heavy hit, one mid type hit |
-| Build (notebook) | quiet: a soft entry and a long soft trace |
-| Run | speed: mid entry, the smear, a soft type tick |
-| Team | calm: the cut is silent, a mid lock on the two of them, a soft globe |
-| Recover | heat: a mid black-frame cut, soft lock, soft rising band |
-| Repeat | chrome again: swell into a heavy hit, a soft lock, a mid type hit, a soft slice |
+| Present | hard entry: the strongest cut of the film, a soft scan lock, the brain as a soft grain, a mid type hit |
+| Build (ring) | mechanical detail: a soft negative cut, a metal lock on the ring |
+| Train | chrome: a swell into a heavy hit; the scan is silent; the eagle as a soft grain |
+| Build (notebook) | quiet: a soft entry, a soft lock, a long soft contour trace |
+| Run | speed: mid entry, silent scan, the cheetah as a quick mid grain, a soft tick on RUN |
+| Team | calm: the cut is silent, a mid lock on the two of them, a tick for the figures |
+| Recover | insight: a mid 1-bit cut, soft lock, the eye as a long soft grain, a soft negative |
+| Repeat | chrome again: swell into a heavy hit, a soft lock, the eagle returns softly |
 | Outro | a four-shot motor drive that fades, the sparkles fly in, the strong metal lock, the wordmark grains |
 
 ## Film cues
 
 | # | Timecode | Function | Sound | Tier | Pan | Scene | Event |
 |---|---|---|---|---|---|---|---|
-| 1 | 00:00:00:00 | texture | C1_short | soft | +0.00 | Boot | hairline frame draws in from the corners, brand line types on |
-| 2 | 00:00:00:06 | transition | A1_heavy | strong | +0.00 | Present | cut in on the x-ray negative |
-| 3 | 00:00:00:13 | lock | B1_soft | soft | +0.01 | Present | brackets lock onto the face |
-| 4 | 00:00:00:22 | texture | C2_mid | mid | +0.00 | Present | 1-bit scan band sweeps down |
-| 5 | 00:00:01:06 | transition | A4_soft | mid | +0.00 | Build (ring) | sliced glitch entry |
-| 6 | 00:00:01:13 | lock | B2_mid | mid | +0.11 | Build (ring) | brackets lock onto the ring |
-| 7 | 00:00:02:00 | transition | C4_swell | mid | +0.00 | Train | chrome sparkle swells through the lens and wipes to TRAIN |
-| 8 | 00:00:02:05 | transition | A1_heavy | strong | +0.00 | Train | chrome sparkle swells through the lens and wipes to TRAIN |
-| 9 | 00:00:02:17 | micro | A3_mid_tight | mid | +0.00 | Train | TRAIN in ink on paper |
-| 10 | 00:00:03:06 | transition | A5_soft_dull | soft | +0.00 | Build (notebook) | arrives as 1-bit, a paper block knocks it into place |
-| 11 | 00:00:03:22 | texture | C3_long | soft | +0.00 | Build (notebook) | the silhouette traces itself in hairline |
-| 12 | 00:00:04:08 | transition | A2_mid | mid | +0.00 | Run | system strip, then a sliced entry |
-| 13 | 00:00:04:23 | texture | C2_mid | mid | +0.00 | Run | the stride smears into horizontal streaks |
-| 14 | 00:00:05:03 | micro | A6_tick | soft | +0.00 | Run | RUN, too big for the frame |
-| 15 | 00:00:05:16 | lock | B2_mid | mid | -0.48 | Team | brackets lock onto both of them |
-| 16 | 00:00:05:23 | texture | C3_long | soft | +0.00 | Team | a wireframe globe turns inside the pendant lamp |
-| 17 | 00:00:06:08 | transition | A3_mid_tight | mid | +0.00 | Recover | one frame of black, only the instruments |
-| 18 | 00:00:06:16 | lock | B1_soft | soft | +0.12 | Recover | brackets lock onto the silhouette |
-| 19 | 00:00:06:24 | texture | C1_short | soft | +0.00 | Recover | heat scan band rises |
-| 20 | 00:00:07:06 | transition | C4_swell | mid | +0.00 | Repeat | chrome sparkle wipes to REPEAT |
-| 21 | 00:00:07:11 | transition | A1_heavy | strong | +0.00 | Repeat | chrome sparkle wipes to REPEAT |
-| 22 | 00:00:07:19 | lock | B1_soft | soft | +0.10 | Repeat | brackets lock onto the lift as the camera pulls back |
-| 23 | 00:00:07:23 | micro | A2_mid | mid | +0.00 | Repeat | REPEAT in ink on paper |
-| 24 | 00:00:08:05 | micro | A4_soft | soft | +0.00 | Repeat | sliced glitch |
-| 25 | 00:00:08:08 | micro | A3_mid_tight | soft | +0.00 | Outro | contact sheet: PRESENT drops into the grid |
-| 26 | 00:00:08:10 | micro | A4_soft | soft | +0.00 | Outro | contact sheet: TRAIN drops into the grid |
-| 27 | 00:00:08:12 | micro | A5_soft_dull | soft | +0.00 | Outro | contact sheet: RUN drops into the grid |
-| 28 | 00:00:08:14 | micro | A6_tick | soft | +0.00 | Outro | contact sheet: RECOVER drops into the grid |
-| 29 | 00:00:08:22 | texture | C3_long | mid | +0.00 | Outro | four chrome sparkles fly in from the corners |
-| 30 | 00:00:09:06 | resolve | B3_strong | strong | +0.00 | Outro | the sparkles lock into the SKRALOVNIK symbol |
-| 31 | 00:00:09:10 | texture | C1_short | soft | +0.00 | Outro | the wordmark resolves from 1-bit noise |
+| 1 | 00:00:00:00 | texture | C1_short | soft | +0.00 | Boot | hairlines draw in from the corners around a glint |
+| 2 | 00:00:00:06 | transition | A1_heavy | strong | +0.00 | Present | thin glitch strips knock the first shot in |
+| 3 | 00:00:00:14 | lock | B1_soft | soft | +0.01 | Present | circular scan of the face |
+| 4 | 00:00:00:15 | micro | C1_short | soft | +0.01 | Present | result: the brain flashes beside the scan |
+| 5 | 00:00:00:29 | micro | A3_mid_tight | mid | +0.00 | Present | PRESENT over the footage, too big for the frame |
+| 6 | 00:00:01:06 | transition | A4_soft | mid | +0.00 | Build (ring) | cut in on the negative |
+| 7 | 00:00:01:15 | lock | B2_mid | mid | +0.11 | Build (ring) | small scan of the meander ring |
+| 8 | 00:00:02:00 | transition | C4_swell | mid | +0.00 | Train | chrome sparkle swells through the lens and wipes to TRAIN |
+| 9 | 00:00:02:05 | transition | A1_heavy | strong | +0.00 | Train | chrome sparkle swells through the lens and wipes to TRAIN |
+| 10 | 00:00:02:15 | micro | C2_mid | soft | -0.25 | Train | result: the eagle flashes beside the scan |
+| 11 | 00:00:03:06 | transition | A5_soft_dull | soft | +0.00 | Build (notebook) | cut in on a 1-bit frame |
+| 12 | 00:00:03:15 | lock | B1_soft | soft | +0.22 | Build (notebook) | scan of the face over the notebook |
+| 13 | 00:00:03:17 | texture | C3_long | soft | +0.00 | Build (notebook) | the silhouette traces itself in hairline |
+| 14 | 00:00:04:08 | transition | A2_mid | mid | +0.00 | Run | thin glitch strips |
+| 15 | 00:00:04:17 | micro | C1_short | mid | +0.04 | Run | result: the cheetah flashes ahead of the runner |
+| 16 | 00:00:05:02 | micro | A6_tick | soft | +0.00 | Run | RUN over the footage, too big for the frame |
+| 17 | 00:00:05:17 | lock | B2_mid | mid | -0.48 | Team | scan of the two of them |
+| 18 | 00:00:05:18 | micro | A6_tick | soft | -0.48 | Team | result: three figures flash beside the scan |
+| 19 | 00:00:06:08 | transition | A3_mid_tight | mid | +0.00 | Recover | cut in on a 1-bit frame |
+| 20 | 00:00:06:18 | lock | B1_soft | soft | +0.13 | Recover | scan of the silhouette in the sauna |
+| 21 | 00:00:06:19 | micro | C3_long | soft | +0.14 | Recover | result: the eye flashes above the silhouette |
+| 22 | 00:00:07:04 | micro | A4_soft | soft | +0.00 | Recover | negative of the heat |
+| 23 | 00:00:07:06 | transition | C4_swell | mid | +0.00 | Repeat | chrome sparkle wipes to REPEAT |
+| 24 | 00:00:07:11 | transition | A1_heavy | strong | +0.00 | Repeat | chrome sparkle wipes to REPEAT |
+| 25 | 00:00:07:19 | lock | B1_soft | soft | +0.10 | Repeat | scan of the lift as the camera pulls back |
+| 26 | 00:00:07:20 | micro | C2_mid | soft | +0.10 | Repeat | result: the eagle returns |
+| 27 | 00:00:08:08 | micro | A3_mid_tight | soft | +0.00 | Outro | contact sheet: PRESENT drops into the grid |
+| 28 | 00:00:08:10 | micro | A4_soft | soft | +0.00 | Outro | contact sheet: TRAIN drops into the grid |
+| 29 | 00:00:08:12 | micro | A5_soft_dull | soft | +0.00 | Outro | contact sheet: RUN drops into the grid |
+| 30 | 00:00:08:14 | micro | A6_tick | soft | +0.00 | Outro | contact sheet: RECOVER drops into the grid |
+| 31 | 00:00:08:22 | texture | C3_long | mid | +0.00 | Outro | four chrome sparkles fly in from the corners |
+| 32 | 00:00:09:06 | resolve | B3_strong | strong | +0.00 | Outro | the sparkles lock into the SKRALOVNIK symbol |
+| 33 | 00:00:09:10 | texture | C1_short | soft | +0.00 | Outro | the wordmark resolves from 1-bit noise |
 
 ## Audition reel (level-matched)
 

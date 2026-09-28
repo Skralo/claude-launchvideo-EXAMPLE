@@ -3,7 +3,7 @@
 // of the event it belongs to. Pan follows where the event happens on screen.
 // Run: npx tsx scripts/skralovnik/export-cues.ts
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
-import { CHAPTERS, EVENTS, FPS, PRE, srcAt, TOTAL, W } from '../../src/skralovnik/timeline';
+import { CHAPTERS, EVENTS, FPS, srcAt, TOTAL, W } from '../../src/skralovnik/timeline';
 
 const track = JSON.parse(readFileSync('public/skralovnik/track.json', 'utf8')) as {
   frames: { box: [number, number, number, number] }[];
@@ -13,7 +13,7 @@ const panOf = (x: number) => +Math.max(-0.7, Math.min(0.7, ((x - W / 2) / (W / 2
 
 const cues = EVENTS.map((e) => {
   const hit = e.hit ?? e.o;
-  const onSubject = e.fn === 'lock' || e.look === 'punch';
+  const onSubject = e.look === 'scan' || e.look === 'element';
   const x = onSubject ? track.frames[srcAt(hit)].box[0] : W / 2;
   return {
     id: e.id,
@@ -32,7 +32,5 @@ const cues = EVENTS.map((e) => {
 
 mkdirSync('out/skralovnik', { recursive: true });
 writeFileSync('out/skralovnik/cues.json', JSON.stringify({ fps: FPS, total: TOTAL, cues }, null, 1));
-// the raw events too, for prep.py (punch-in crops are cut from the 4K source)
-writeFileSync('out/skralovnik/timeline.json', JSON.stringify({ pre: PRE, events: EVENTS }, null, 1));
 const byFn = cues.reduce<Record<string, number>>((m, c) => ((m[c.fn] = (m[c.fn] ?? 0) + 1), m), {});
 console.log('wrote out/skralovnik/cues.json:', cues.length, 'cues', JSON.stringify(byFn));

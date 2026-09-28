@@ -11,9 +11,9 @@ export const SERIF = '"Cormorant Garamond", serif';
 export const PIXEL = '"Silkscreen", monospace';
 
 const pad = (n: number) => String(n).padStart(4, '0');
-export const plate = (kind: 'bw' | 'col' | 'd4' | 'd8', src: number) =>
-  staticFile(`skralovnik/plate/${kind}/${pad(src)}.${kind === 'd4' || kind === 'd8' ? 'png' : 'jpg'}`);
-export const punchPlate = (id: string) => staticFile(`skralovnik/plate/punch/${id}.jpg`);
+export const plate = (kind: 'org' | 'd4' | 'd8', src: number) =>
+  staticFile(`skralovnik/plate/${kind}/${pad(src)}.${kind === 'org' ? 'jpg' : 'png'}`);
+export const elementFile = (file: string) => staticFile(`skralovnik/elements/${file}.png`);
 
 /** Deterministic hash noise in [0, 1). */
 export const rnd = (a: number, b = 0, c = 0) => {
