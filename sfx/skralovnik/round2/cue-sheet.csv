@@ -11,20 +11,20 @@ t-in,65,00:00:02:05,2.1667,transition,A1_heavy,strong,0,Train,wipe,chrome sparkl
 t-el,75,00:00:02:15,2.5,micro,C2_mid,soft,-0.25,Train,element,result: the eagle flashes beside the scan
 b2-in,96,00:00:03:06,3.2,transition,A5_soft_dull,soft,0,Build,dit,cut in on a 1-bit frame
 b2-scan,105,00:00:03:15,3.5,lock,B1_soft,soft,0.22,Build,scan,scan of the face over the notebook
-b2-contour,107,00:00:03:17,3.5667,texture,C3_long,soft,0,Build,contour,the silhouette traces itself in hairline
+b2-ring,106,00:00:03:16,3.5333,texture,C3_long,soft,0,Build,ring,"the word ring turns around him, behind him"
 r-in,128,00:00:04:08,4.2667,transition,A2_mid,mid,0,Run,strips,thin glitch strips
-r-el,137,00:00:04:17,4.5667,micro,C1_short,mid,0.04,Run,element,result: the cheetah flashes ahead of the runner
+r-el,137,00:00:04:17,4.5667,micro,C1_short,mid,0.04,Run,element,result: the tiger leaps ahead of the runner
 r-type,152,00:00:05:02,5.0667,micro,A6_tick,soft,0,Run,type,"RUN over the footage, too big for the frame"
 tm-scan,167,00:00:05:17,5.5667,lock,B2_mid,mid,-0.48,Team,scan,scan of the two of them
 tm-el,168,00:00:05:18,5.6,micro,A6_tick,soft,-0.48,Team,element,result: three figures flash beside the scan
 rc-in,188,00:00:06:08,6.2667,transition,A3_mid_tight,mid,0,Recover,dit,cut in on a 1-bit frame
-rc-scan,198,00:00:06:18,6.6,lock,B1_soft,soft,0.13,Recover,scan,scan of the silhouette in the sauna
-rc-el,199,00:00:06:19,6.6333,micro,C3_long,soft,0.14,Recover,element,result: the eye flashes above the silhouette
+rc-orbit,198,00:00:06:18,6.6,lock,B2_mid,mid,0,Recover,orbit,the orbital HUD is the scan: its eye locks on the head
+rc-el,200,00:00:06:20,6.6667,micro,C1_short,soft,0.15,Recover,element,"result, a beat later: the sword"
 rc-neg,214,00:00:07:04,7.1333,micro,A4_soft,soft,0,Recover,neg,negative of the heat
 rp-in,216,00:00:07:06,7.2,transition,C4_swell,mid,0,Repeat,wipe,chrome sparkle wipes to REPEAT
 rp-in,221,00:00:07:11,7.3667,transition,A1_heavy,strong,0,Repeat,wipe,chrome sparkle wipes to REPEAT
 rp-scan,229,00:00:07:19,7.6333,lock,B1_soft,soft,0.1,Repeat,scan,scan of the lift as the camera pulls back
-rp-el,230,00:00:07:20,7.6667,micro,C2_mid,soft,0.1,Repeat,element,result: the eagle returns
+rp-el,230,00:00:07:20,7.6667,micro,C2_mid,soft,0.1,Repeat,element,result: the Spartan helmet
 recap-1,248,00:00:08:08,8.2667,micro,A3_mid_tight,soft,0,Outro,recap,contact sheet: PRESENT drops into the grid
 recap-3,250,00:00:08:10,8.3333,micro,A4_soft,soft,0,Outro,recap,contact sheet: TRAIN drops into the grid
 recap-5,252,00:00:08:12,8.4,micro,A5_soft_dull,soft,0,Outro,recap,contact sheet: RUN drops into the grid

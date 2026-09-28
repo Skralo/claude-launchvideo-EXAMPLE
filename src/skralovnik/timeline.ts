@@ -37,11 +37,13 @@ export const srcAt = (o: number) => Math.max(0, Math.min(CUTS[8] - 1, o - PRE));
 export type Fn = 'micro' | 'transition' | 'lock' | 'texture' | 'resolve';
 
 // v2 (feedback on v1): the footage stays as it is, in its own colour and speed, and is clean for
-// about 60 % of every shot. The edit arrives in bursts over it, black and white. Only four looks
-// may take the whole frame for a frame or two: negative, 1-bit, the chapter word over the
-// footage, and the chrome sparkle on a cut. Everything else is an overlay.
+// most of every shot. The edit arrives in bursts over it. Only four looks may take the whole
+// frame for a frame or two: negative, 1-bit, the chapter word over the footage, and the chrome
+// sparkle on a cut. Everything else is an overlay.
+// v3 (feedback on v2): every scan, circle and line is white, every element mostly white; new
+// elements from Anže (tiger, sword, helmet, orbital HUD, word ring, the logo).
 export type BaseLook = 'neg' | 'dit' | 'type';
-export type OverLook = 'boot' | 'wipe' | 'strips' | 'strip' | 'contour' | 'scan' | 'element' | 'recap' | 'collapse' | 'converge' | 'lockup' | 'wordmark' | 'flat';
+export type OverLook = 'boot' | 'wipe' | 'strips' | 'strip' | 'contour' | 'scan' | 'orbit' | 'element' | 'ring' | 'recap' | 'collapse' | 'converge' | 'lockup' | 'wordmark' | 'flat';
 export type Look = BaseLook | OverLook;
 
 export type Ev = {
@@ -62,9 +64,6 @@ export type Ev = {
 
 const BASE: ReadonlySet<string> = new Set(['neg', 'dit', 'type']);
 export const isBase = (l: Look): l is BaseLook => BASE.has(l);
-
-/** Overlay tone per shot: paper (white) lines on the dark shots, ink (black) on the bright ones. */
-export const TONE: ('paper' | 'ink')[] = ['paper', 'ink', 'ink', 'ink', 'ink', 'ink', 'paper', 'paper'];
 
 const s = shotStart;
 /** A scan around the subject; it locks (the sound) on its last frame, then its result flashes. */
@@ -99,12 +98,14 @@ export const EVENTS: Ev[] = [
   // 4 Build (notebook) --------------------------------------------------------------------
   { id: 'b2-in', o: s(3), dur: 1, fn: 'transition', look: 'dit', shot: 3, note: 'cut in on a 1-bit frame' },
   ...scan('b2', 3, 4, 6, 'scan of the face over the notebook', '[PLAN]'),
-  { id: 'b2-contour', o: s(3) + 11, dur: 4, fn: 'texture', look: 'contour', shot: 3, note: 'the silhouette traces itself in hairline' },
+  element('b2', 3, 10, 'logo', '[PLAN]', 'result: the SKRALOVNIK logo, white and big'),
+  { id: 'b2-ring', o: s(3) + 10, dur: 8, fn: 'texture', look: 'ring', shot: 3, note: 'the word ring turns around him, behind him' },
+  { id: 'b2-contour', o: s(3) + 19, dur: 4, fn: 'texture', look: 'contour', shot: 3, note: 'the silhouette traces itself in hairline' },
 
   // 5 Run: speed ---------------------------------------------------------------------------
   { id: 'r-in', o: s(4), dur: 2, fn: 'transition', look: 'strips', shot: 4, note: 'thin glitch strips' },
   ...scan('r', 4, 3, 6, "scan of the runner's head", '[SPEED]'),
-  element('r', 4, 9, 'cheetah', '[SPEED]', 'result: the cheetah flashes ahead of the runner', 1),
+  element('r', 4, 9, 'tiger', '[SPEED]', 'result: the tiger leaps ahead of the runner', 1),
   { id: 'r-type', o: s(4) + 24, dur: 1, fn: 'micro', look: 'type', shot: 4, note: 'RUN over the footage, too big for the frame' },
 
   // 6 Team -------------------------------------------------------------------------------
@@ -114,14 +115,14 @@ export const EVENTS: Ev[] = [
 
   // 7 Recover: insight -------------------------------------------------------------------
   { id: 'rc-in', o: s(6), dur: 1, fn: 'transition', look: 'dit', shot: 6, note: 'cut in on a 1-bit frame' },
-  ...scan('rc', 6, 5, 6, 'scan of the silhouette in the sauna', '[INSIGHT]'),
-  element('rc', 6, 11, 'eye', '[INSIGHT]', 'result: the eye flashes above the silhouette'),
+  { id: 'rc-orbit', o: s(6) + 5, dur: 6, hit: s(6) + 10, fn: 'lock', look: 'orbit', shot: 6, note: 'the orbital HUD is the scan: its eye locks on the head', p: { label: '[INSIGHT]', fx: 0.4, fy: -0.5 } },
+  element('rc', 6, 12, 'sword', '[SHARPEN]', 'result, a beat later: the sword'),
   { id: 'rc-neg', o: s(6) + 26, dur: 1, fn: 'micro', look: 'neg', shot: 6, note: 'negative of the heat' },
 
   // 8 Repeat: rise -------------------------------------------------------------------------
   { id: 'rp-in', o: s(7) - 2, dur: 4, hit: s(7), fn: 'transition', look: 'wipe', shot: 7, note: 'chrome sparkle wipes to REPEAT' },
   ...scan('rp', 7, 4, 5, 'scan of the lift as the camera pulls back', '[RISE]'),
-  element('rp', 7, 9, 'eagle', '[RISE]', 'result: the eagle returns'),
+  element('rp', 7, 9, 'helmet', '[DISCIPLINE]', 'result: the Spartan helmet'),
 
   // Outro: the day again, then the mark ----------------------------------------------
   ...Array.from({ length: 8 }, (_, k): Ev => ({

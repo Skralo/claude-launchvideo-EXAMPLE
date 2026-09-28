@@ -10,16 +10,17 @@ needs, per source frame:
   public/skralovnik/plate/d8/NNNN.png    240x135 1-bit dither (small tiles)
   public/skralovnik/track.json           per-frame lock box and subject contour (committed)
 
-and, from the overlay elements in public/skralovnik/elements/src/ (Anže's cut-outs):
+and, from the overlay elements in public/skralovnik/elements/src/ (Anže's cut-outs) and logo.svg:
 
-  public/skralovnik/elements/NAME.png, NAME-ink.png, NAME-bit.png, NAME-bit-ink.png
-      trimmed to their alpha; white as drawn, inverted to ink for bright shots, and 1-bit versions
+  public/skralovnik/elements/NAME.png, NAME-bit.png   trimmed, mostly white, and a white 1-bit version
+  public/skralovnik/matte/NNNN.png                   person matte where an element passes behind him
+  public/skralovnik/plate/cut/NNNN.png               the colour plate cut out with that matte
 
 The lock boxes come from MediaPipe pose landmarks (the ring in the typing shot is followed with
 optical flow instead, because hands on a keyboard are not a pose). Contours come from two person
 segmenters (selfie multiclass + DeepLab person), maxed. Models download on first run.
 
-Usage: python3 scripts/skralovnik/prep.py [--skip-track] [--elements]
+Usage: python3 scripts/skralovnik/prep.py [--skip-track] [--elements] [--matte] [--cutouts]
 """
 import json
 import os
@@ -321,40 +322,117 @@ def build_track(frames_dir):
 # ---------------------------------------------------------------------------------------
 # overlay elements
 # ---------------------------------------------------------------------------------------
-ELEMENTS = ('brain', 'eagle', 'cheetah', 'figures', 'eye')
+# name: (longest side in px, treatment). Treatments keep every element mostly white:
+#   lift   lighter overall, detail kept (the eagle, "more white")
+#   white  solid white, alpha kept (the figures, high contrast)
+#   lines  dark line art turned into white lines on transparent, light fills dropped (orbital HUD)
+ELEMENTS = {
+    'brain': (640, None), 'eagle': (640, 'lift'), 'cheetah': (640, None), 'figures': (640, 'white'),
+    'eye': (640, None), 'network': (800, None), 'tiger': (700, None), 'sword': (820, None),
+    'helmet': (720, None), 'orbit': (1000, 'lines'), 'words': (1000, None), 'logo': (1200, None),
+}
 
 
-def build_elements(max_side=640):
-    """Each cut-out trimmed to its alpha and scaled to max_side, in four versions: as drawn (white,
-    for dark shots), inverted to ink (bright shots), and 1-bit versions of both (the flash frames)."""
-    src_dir = os.path.join(PUB, 'elements', 'src')
+def element_rgba(name):
+    """The source cut-out as RGBA; the logo is rendered from the website's logo.svg."""
+    if name == 'logo':
+        import io
+        import cairosvg
+        png = cairosvg.svg2png(url=os.path.join(PUB, 'logo.svg'), output_width=2400)
+        return np.array(Image.open(io.BytesIO(png)).convert('RGBA'))
+    return np.array(Image.open(os.path.join(PUB, 'elements', 'src', f'{name}.webp')).convert('RGBA'))
+
+
+def build_elements():
+    """Each cut-out trimmed to its alpha, scaled, given its treatment, and saved twice: as drawn
+    (NAME.png) and as white 1-bit dots (NAME-bit.png, the first and last flash frames)."""
     out_dir = os.path.join(PUB, 'elements')
     sizes = {}
-    for name in ELEMENTS:
-        im = Image.open(os.path.join(src_dir, f'{name}.webp')).convert('RGBA')
-        a = np.array(im)
+    for name, (side, treat) in ELEMENTS.items():
+        a = element_rgba(name)
         ys, xs = np.nonzero(a[..., 3] > 8)
         a = a[ys.min():ys.max() + 1, xs.min():xs.max() + 1]
-        k = max_side / max(a.shape[:2])
+        k = side / max(a.shape[:2])
         a = cv2.resize(a, (round(a.shape[1] * k), round(a.shape[0] * k)), interpolation=cv2.INTER_AREA)
-        rgb, alpha = a[..., :3], a[..., 3]
-        ink = 255 - rgb
-        lum = cv2.cvtColor(rgb, cv2.COLOR_RGB2GRAY)
-        bits = np.array(Image.fromarray(lum, 'L').convert('1').convert('L'))
-        solid = np.where(alpha > 96, 255, 0).astype(np.uint8)
-        for suffix, px, al in (('', rgb, alpha), ('-ink', ink, alpha),
-                               ('-bit', np.repeat(bits[..., None], 3, 2), np.minimum(solid, bits)),
-                               ('-bit-ink', np.repeat(255 - bits[..., None], 3, 2), np.minimum(solid, bits))):
-            Image.fromarray(np.dstack([px, al]).astype(np.uint8), 'RGBA').save(os.path.join(out_dir, f'{name}{suffix}.png'))
+        rgb, alpha = a[..., :3].astype(np.float32), a[..., 3].astype(np.float32)
+        lum = cv2.cvtColor(a[..., :3], cv2.COLOR_RGB2GRAY).astype(np.float32)
+        if treat == 'lift':
+            rgb = 255 - (255 - rgb) * 0.45
+        elif treat == 'white':
+            rgb = np.full_like(rgb, 255)
+        elif treat == 'lines':
+            alpha = np.clip(alpha * np.clip((235 - lum) / 150, 0, 1) * 1.4, 0, 255)
+            rgb = np.full_like(rgb, 255)
+        clean = np.dstack([rgb, alpha]).astype(np.uint8)
+        value = (cv2.cvtColor(clean[..., :3], cv2.COLOR_RGB2GRAY).astype(np.float32) * alpha / 255).astype(np.uint8)
+        bits = np.array(Image.fromarray(value, 'L').convert('1').convert('L'))
+        bit = np.dstack([np.full(bits.shape + (3,), 255, np.uint8), np.where(alpha > 40, bits, 0).astype(np.uint8)])
+        Image.fromarray(clean, 'RGBA').save(os.path.join(out_dir, f'{name}.png'))
+        Image.fromarray(bit, 'RGBA').save(os.path.join(out_dir, f'{name}-bit.png'))
         sizes[name] = [int(a.shape[1]), int(a.shape[0])]
-        print(f'  element {name} {sizes[name]}')
+        print(f'  element {name} {sizes[name]} {treat or ""}')
     with open(os.path.join(out_dir, 'sizes.json'), 'w') as fh:
         json.dump(sizes, fh)
+
+
+# ---------------------------------------------------------------------------------------
+# matte (the word ring passes behind Anže in the notebook shot)
+# ---------------------------------------------------------------------------------------
+MATTE_SHOTS = (3,)
+
+
+def build_matte(frames_dir):
+    """Person matte for the shots where an element goes behind the subject: both segmenters,
+    maxed, thresholded softly and feathered; saved as white-on-alpha PNGs (committed)."""
+    import mediapipe as mp
+    from mediapipe.tasks import python as mpt
+    from mediapipe.tasks.python import vision
+    m = models()
+    seg = vision.ImageSegmenter.create_from_options(vision.ImageSegmenterOptions(
+        base_options=mpt.BaseOptions(model_asset_path=m['selfie_mc.tflite']),
+        running_mode=vision.RunningMode.IMAGE, output_confidence_masks=True))
+    dl = vision.ImageSegmenter.create_from_options(vision.ImageSegmenterOptions(
+        base_options=mpt.BaseOptions(model_asset_path=m['deeplab.tflite']),
+        running_mode=vision.RunningMode.IMAGE, output_confidence_masks=True))
+    out_dir = os.path.join(PUB, 'matte')
+    os.makedirs(out_dir, exist_ok=True)
+    for s in MATTE_SHOTS:
+        for f in range(CUTS[s], CUTS[s + 1]):
+            rgb = cv2.cvtColor(load(frames_dir, f), cv2.COLOR_BGR2RGB)
+            img = mp.Image(image_format=mp.ImageFormat.SRGB, data=rgb)
+            a = 1.0 - seg.segment(img).confidence_masks[0].numpy_view()
+            b = dl.segment(img).confidence_masks[15].numpy_view()
+            mk = np.maximum(cv2.resize(a, (960, 540)), cv2.resize(b, (960, 540)))
+            mk = np.clip((mk - 0.55) / 0.25, 0, 1)
+            mk = cv2.GaussianBlur(mk, (0, 0), 1.5)
+            px = np.dstack([np.full((540, 960, 3), 255, np.uint8), (mk * 255).astype(np.uint8)])
+            Image.fromarray(px, 'RGBA').save(os.path.join(out_dir, f'{f:04d}.png'))
+        print(f'  matte shot {s + 1}')
+    build_cutouts()
+
+
+def build_cutouts():
+    """Anže cut out of the colour plate with the committed matte (no MediaPipe needed), so an
+    element can pass behind him: plate/cut/NNNN.png, 1920x1080 RGBA."""
+    matte_dir = os.path.join(PUB, 'matte')
+    out_dir = os.path.join(PLATE, 'cut')
+    os.makedirs(out_dir, exist_ok=True)
+    for name in sorted(os.listdir(matte_dir)):
+        f = int(name[:4])
+        rgb = cv2.cvtColor(cv2.imread(os.path.join(PLATE, 'org', f'{f:04d}.jpg')), cv2.COLOR_BGR2RGB)
+        alpha = cv2.resize(np.array(Image.open(os.path.join(matte_dir, name)))[..., 3], (W, H), interpolation=cv2.INTER_LINEAR)
+        Image.fromarray(np.dstack([rgb, alpha]), 'RGBA').save(os.path.join(out_dir, name))
 
 
 if __name__ == '__main__':
     if '--elements' in sys.argv:
         build_elements()
+        sys.exit(0)
+    if '--matte' in sys.argv:
+        build_matte(extract_frames())
+        sys.exit(0)
+    if '--cutouts' in sys.argv:
+        build_cutouts()
         sys.exit(0)
     frames_dir = extract_frames()
     print('elements')

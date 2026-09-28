@@ -265,12 +265,12 @@ SCENES = {
     'Boot': 'one soft grain as the system wakes',
     'Present': 'hard entry: the strongest cut of the film, a soft scan lock, the brain as a soft grain, a mid type hit',
     'Build (ring)': 'mechanical detail: a soft negative cut, a metal lock on the ring',
-    'Train': 'chrome: a swell into a heavy hit; the scan is silent; the eagle as a soft grain',
-    'Build (notebook)': 'quiet: a soft entry, a soft lock, a long soft contour trace',
-    'Run': 'speed: mid entry, silent scan, the cheetah as a quick mid grain, a soft tick on RUN',
+    'Train': 'chrome: a swell into a heavy hit; the scan is silent; the white eagle as a soft grain',
+    'Build (notebook)': 'quiet: a soft entry, a soft lock, then the logo and the word ring on one long soft grain; the contour trace stays silent',
+    'Run': 'speed: mid entry, silent scan, the tiger as a quick mid grain, a soft tick on RUN',
     'Team': 'calm: the cut is silent, a mid lock on the two of them, a tick for the figures',
-    'Recover': 'insight: a mid 1-bit cut, soft lock, the eye as a long soft grain, a soft negative',
-    'Repeat': 'chrome again: swell into a heavy hit, a soft lock, the eagle returns softly',
+    'Recover': 'insight: a mid 1-bit cut, the orbital HUD locks on the head with the metal lock, the sword a beat later as a quick soft grain, a soft negative',
+    'Repeat': 'chrome again: swell into a heavy hit, a soft lock, the Spartan helmet as a soft grain',
     'Outro': 'a four-shot motor drive that fades, the sparkles fly in, the strong metal lock, the wordmark grains',
 }
 PLAN = {
@@ -285,15 +285,15 @@ PLAN = {
     't-el': [('C2_mid', 'soft')],
     'b2-in': [('A5_soft_dull', 'soft')],
     'b2-scan': [('B1_soft', 'soft')],
-    'b2-contour': [('C3_long', 'soft')],
+    'b2-ring': [('C3_long', 'soft')],
     'r-in': [('A2_mid', 'mid')],
     'r-el': [('C1_short', 'mid')],
     'r-type': [('A6_tick', 'soft')],
     'tm-scan': [('B2_mid', 'mid')],
     'tm-el': [('A6_tick', 'soft')],
     'rc-in': [('A3_mid_tight', 'mid')],
-    'rc-scan': [('B1_soft', 'soft')],
-    'rc-el': [('C3_long', 'soft')],
+    'rc-orbit': [('B2_mid', 'mid')],
+    'rc-el': [('C1_short', 'soft')],
     'rc-neg': [('A4_soft', 'soft')],
     'rp-in': [('C4_swell', 'mid', -5), ('A1_heavy', 'strong')],
     'rp-scan': [('B1_soft', 'soft')],
@@ -448,7 +448,7 @@ def write_cue_sheet(rows, marks, n_events):
           'overall too many sounds and one pattern repeating through the film. Round 2: families of variants, '
           f'a pattern per scene, {len(rows)} sounds on {len({r["id"] for r in rows})} of {n_events} picture events, '
           f'tiers soft {TIER_DB["soft"]:+.1f} dB, mid {TIER_DB["mid"]:+.1f} dB, strong {TIER_DB["strong"]:+.1f} dB.', '',
-          'Picture: v2 (footage in its own colour, the edit in bursts: scan, result, flashes).', '',
+          'Picture: v3 (footage in its own colour, the edit in bursts and in white: scan, result, flashes).', '',
           '## Patterns per scene', '', '| Scene | Pattern |', '|---|---|']
     md += [f'| {s} | {p} |' for s, p in SCENES.items()]
     md += ['', '## Film cues', '', '| # | Timecode | Function | Sound | Tier | Pan | Scene | Event |', '|---|---|---|---|---|---|---|---|']

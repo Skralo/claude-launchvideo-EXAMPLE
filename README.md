@@ -1,54 +1,68 @@
-# SKRALOVNIK — personal film (v2)
+# SKRALOVNIK — personal film (v3)
 
 Anže's 8-second personal landing video (8 shots, 4K, 30 fps), rebuilt as a 10-second motion-design
 piece and scored with SFX only (the camera sound is removed). It is built with the same tools as the
 Tessel film below: the picture in Remotion, the sound synthesized in Python, both reading one timeline.
 
-[![SKRALOVNIK film v2](video/skralovnik-v2-sheet.jpg)](video/skralovnik-v2.mp4)
+[![SKRALOVNIK film v3](video/skralovnik-v3-sheet.jpg)](video/skralovnik-v3.mp4)
 
-**Watch:** [`video/skralovnik-v2.mp4`](video/skralovnik-v2.mp4) (master, 1920×1080, 30 fps, AAC 320 kb/s) ·
-[`video/skralovnik-v2-web.mp4`](video/skralovnik-v2-web.mp4) (8 Mb/s, for the website).
-v1 (black-and-white, denser) stays in `video/skralovnik-v1*.mp4` for comparison.
+**Watch:** [`video/skralovnik-v3.mp4`](video/skralovnik-v3.mp4) (master, 1920×1080, 30 fps, AAC 320 kb/s) ·
+[`video/skralovnik-v3-web.mp4`](video/skralovnik-v3-web.mp4) (8 Mb/s, for the website).
+v2 is kept unchanged on the branch `claude/skralovnik-v2`; v1 (black-and-white, denser) stays in
+`video/skralovnik-v1*.mp4` for comparison.
 
 **The idea.** The day in its own colour, analysed in bursts. The eight chapters from the website
 (Present · Build · Train · Build · Run · Team · Recover · Repeat) keep their cuts and their speed,
-and every shot stays clean for about 60 % of its frames. The edit arrives over the footage in black
-and white: a circular scan in thin lines finds the subject (tracked with pose landmarks, the ring
-with optical flow), locks, and its result flashes beside it for four frames: one of Anže's cut-outs
-(brain for Present, eagle for Train and Repeat, cheetah for Run, three figures for Team, the eye for
-Recover), 1-bit, clean, clean, 1-bit, white on the dark shots and ink on the bright ones. Only four
-looks ever take the whole frame, for a frame or two: the negative, a 1-bit frame, the chapter word
-over the moving footage, and the chrome sparkle that wipes two cuts. At the end four chrome
-sparkles lock into the SKRALOVNIK symbol, which then settles into the flat logo from `logo.svg`,
-over the last frame of the day veiled like the website's hero.
+and most of every shot stays clean. The edit arrives over the footage and all of it is white: a
+circular scan in thin lines finds the subject (tracked with pose landmarks, the ring with optical
+flow), locks, and its result flashes beside it for four frames: one of Anže's cut-outs, 1-bit,
+clean, clean, 1-bit, with a soft dark glow so it reads on the bright shots too.
+
+| Shot | Scan → result |
+| --- | --- |
+| Present | brain |
+| Build (ring) | scan only, film strip |
+| Train | eagle (lifted to white) |
+| Build (notebook) | the SKRALOVNIK logo, big and white, then the word ring turning around him, behind him (person matte from MediaPipe), then the contour |
+| Run | tiger, leaping ahead of the runner |
+| Team | three figures, solid white, bigger |
+| Recover | the orbital HUD is the scan itself, its eye locking on his head; a beat later the sword |
+| Repeat | Spartan helmet |
+
+Only four looks ever take the whole frame, for a frame or two: the negative, a 1-bit frame, the
+chapter word over the moving footage, and the chrome sparkle that wipes two cuts. At the end four
+chrome sparkles lock into the SKRALOVNIK symbol, which then settles into the flat logo from
+`logo.svg`, over the last frame of the day veiled like the website's hero.
 
 **Sound.** An original SFX palette built in rounds, no samples, no tonal beeps, sweeps, bells,
 drums or reverb. Round 1 ([`sfx/skralovnik/round1/`](sfx/skralovnik/round1/)) tested three dry
 mechanical-digital prototypes (A SHUTTER, B LOCK, C GRAIN). Round 2
 ([`sfx/skralovnik/round2/`](sfx/skralovnik/round2/)) follows the feedback: families of variants so
 nothing repeats, more metal and spring in the lock, and a pattern per scene with fewer, mostly soft
-sounds and four strong ones. Each round has its cue sheet, a level-matched audition reel, the
-individual 48 kHz / 24-bit WAVs and QC (peaks, clean endings, mono compatibility).
+sounds and four strong ones. v3 keeps the round-2 sounds and re-plans the cues it changed (the ring
+and logo, the orbital lock, the sword). Each round has its cue sheet, a level-matched audition reel,
+the individual 48 kHz / 24-bit WAVs and QC (peaks, clean endings, mono compatibility).
 
 **Checks on every render** (`scripts/skralovnik/post.py`): audio sync to the sample, true peak after
 the AAC encode at or under −1 dBTP, and a flash scan (at most 2 full-frame luminance flashes in any
-second; WCAG 2.3.1 allows 3; v2 peaks at 1).
+second; WCAG 2.3.1 allows 3).
 
 ```bash
 npm run skralovnik   # plates + elements → timeline → SFX → frames → grain + master + checks
 ```
 
 Needs `ffmpeg` (with libx264) on the PATH and Python with
-`numpy scipy opencv-python-headless pillow soundfile pyloudnorm` (plus `mediapipe` only if
-`public/skralovnik/track.json` is deleted and tracking has to run again).
+`numpy scipy opencv-python-headless pillow soundfile pyloudnorm cairosvg` (plus `mediapipe` only if
+`public/skralovnik/track.json` or `public/skralovnik/matte/` is deleted and has to be made again).
 
 ```
-src/skralovnik/        timeline.ts (events → looks and cues), Film, Plate, Scan (scan + result),
-                       Hud, Textures, Chrome (Three.js sparkle), Outro, Label
-scripts/skralovnik/    prep.py (colour + 1-bit plates, elements, tracking), export-cues.ts, sfx.py,
-                       post.py, render.sh
-public/skralovnik/     source footage, logo / symbol / wordmark SVGs, track.json, elements/
-sfx/skralovnik/        SFX round 1 deliverables
+src/skralovnik/        timeline.ts (events → looks and cues), Film, Plate, Scan (scan, orbital scan,
+                       word ring, result), Hud, Textures, Chrome (Three.js sparkle), Outro, Label
+scripts/skralovnik/    prep.py (colour + 1-bit plates, elements, tracking, matte, cut-outs),
+                       export-cues.ts, sfx.py, post.py, render.sh
+public/skralovnik/     source footage, logo / symbol / wordmark SVGs, track.json, elements/ (src/ are
+                       Anže's originals), matte/ (person matte for the word ring)
+sfx/skralovnik/        SFX deliverables, round 1 and round 2
 ```
 
 ---

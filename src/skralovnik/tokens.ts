@@ -14,6 +14,7 @@ const pad = (n: number) => String(n).padStart(4, '0');
 export const plate = (kind: 'org' | 'd4' | 'd8', src: number) =>
   staticFile(`skralovnik/plate/${kind}/${pad(src)}.${kind === 'org' ? 'jpg' : 'png'}`);
 export const elementFile = (file: string) => staticFile(`skralovnik/elements/${file}.png`);
+export const cutPlate = (src: number) => staticFile(`skralovnik/plate/cut/${pad(src)}.png`);
 
 /** Deterministic hash noise in [0, 1). */
 export const rnd = (a: number, b = 0, c = 0) => {

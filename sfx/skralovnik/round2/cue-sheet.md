@@ -1,8 +1,8 @@
 # SKRALOVNIK film: SFX cue sheet (round 2)
 
-Round 1 feedback: A works but repeats too often; B works, wants more metal and spring; C works; overall too many sounds and one pattern repeating through the film. Round 2: families of variants, a pattern per scene, 33 sounds on 31 of 42 picture events, tiers soft -10.0 dB, mid -4.5 dB, strong +0.0 dB.
+Round 1 feedback: A works but repeats too often; B works, wants more metal and spring; C works; overall too many sounds and one pattern repeating through the film. Round 2: families of variants, a pattern per scene, 33 sounds on 31 of 44 picture events, tiers soft -10.0 dB, mid -4.5 dB, strong +0.0 dB.
 
-Picture: v2 (footage in its own colour, the edit in bursts: scan, result, flashes).
+Picture: v3 (footage in its own colour, the edit in bursts and in white: scan, result, flashes).
 
 ## Patterns per scene
 
@@ -11,12 +11,12 @@ Picture: v2 (footage in its own colour, the edit in bursts: scan, result, flashe
 | Boot | one soft grain as the system wakes |
 | Present | hard entry: the strongest cut of the film, a soft scan lock, the brain as a soft grain, a mid type hit |
 | Build (ring) | mechanical detail: a soft negative cut, a metal lock on the ring |
-| Train | chrome: a swell into a heavy hit; the scan is silent; the eagle as a soft grain |
-| Build (notebook) | quiet: a soft entry, a soft lock, a long soft contour trace |
-| Run | speed: mid entry, silent scan, the cheetah as a quick mid grain, a soft tick on RUN |
+| Train | chrome: a swell into a heavy hit; the scan is silent; the white eagle as a soft grain |
+| Build (notebook) | quiet: a soft entry, a soft lock, then the logo and the word ring on one long soft grain; the contour trace stays silent |
+| Run | speed: mid entry, silent scan, the tiger as a quick mid grain, a soft tick on RUN |
 | Team | calm: the cut is silent, a mid lock on the two of them, a tick for the figures |
-| Recover | insight: a mid 1-bit cut, soft lock, the eye as a long soft grain, a soft negative |
-| Repeat | chrome again: swell into a heavy hit, a soft lock, the eagle returns softly |
+| Recover | insight: a mid 1-bit cut, the orbital HUD locks on the head with the metal lock, the sword a beat later as a quick soft grain, a soft negative |
+| Repeat | chrome again: swell into a heavy hit, a soft lock, the Spartan helmet as a soft grain |
 | Outro | a four-shot motor drive that fades, the sparkles fly in, the strong metal lock, the wordmark grains |
 
 ## Film cues
@@ -35,20 +35,20 @@ Picture: v2 (footage in its own colour, the edit in bursts: scan, result, flashe
 | 10 | 00:00:02:15 | micro | C2_mid | soft | -0.25 | Train | result: the eagle flashes beside the scan |
 | 11 | 00:00:03:06 | transition | A5_soft_dull | soft | +0.00 | Build (notebook) | cut in on a 1-bit frame |
 | 12 | 00:00:03:15 | lock | B1_soft | soft | +0.22 | Build (notebook) | scan of the face over the notebook |
-| 13 | 00:00:03:17 | texture | C3_long | soft | +0.00 | Build (notebook) | the silhouette traces itself in hairline |
+| 13 | 00:00:03:16 | texture | C3_long | soft | +0.00 | Build (notebook) | the word ring turns around him, behind him |
 | 14 | 00:00:04:08 | transition | A2_mid | mid | +0.00 | Run | thin glitch strips |
-| 15 | 00:00:04:17 | micro | C1_short | mid | +0.04 | Run | result: the cheetah flashes ahead of the runner |
+| 15 | 00:00:04:17 | micro | C1_short | mid | +0.04 | Run | result: the tiger leaps ahead of the runner |
 | 16 | 00:00:05:02 | micro | A6_tick | soft | +0.00 | Run | RUN over the footage, too big for the frame |
 | 17 | 00:00:05:17 | lock | B2_mid | mid | -0.48 | Team | scan of the two of them |
 | 18 | 00:00:05:18 | micro | A6_tick | soft | -0.48 | Team | result: three figures flash beside the scan |
 | 19 | 00:00:06:08 | transition | A3_mid_tight | mid | +0.00 | Recover | cut in on a 1-bit frame |
-| 20 | 00:00:06:18 | lock | B1_soft | soft | +0.13 | Recover | scan of the silhouette in the sauna |
-| 21 | 00:00:06:19 | micro | C3_long | soft | +0.14 | Recover | result: the eye flashes above the silhouette |
+| 20 | 00:00:06:18 | lock | B2_mid | mid | +0.00 | Recover | the orbital HUD is the scan: its eye locks on the head |
+| 21 | 00:00:06:20 | micro | C1_short | soft | +0.15 | Recover | result, a beat later: the sword |
 | 22 | 00:00:07:04 | micro | A4_soft | soft | +0.00 | Recover | negative of the heat |
 | 23 | 00:00:07:06 | transition | C4_swell | mid | +0.00 | Repeat | chrome sparkle wipes to REPEAT |
 | 24 | 00:00:07:11 | transition | A1_heavy | strong | +0.00 | Repeat | chrome sparkle wipes to REPEAT |
 | 25 | 00:00:07:19 | lock | B1_soft | soft | +0.10 | Repeat | scan of the lift as the camera pulls back |
-| 26 | 00:00:07:20 | micro | C2_mid | soft | +0.10 | Repeat | result: the eagle returns |
+| 26 | 00:00:07:20 | micro | C2_mid | soft | +0.10 | Repeat | result: the Spartan helmet |
 | 27 | 00:00:08:08 | micro | A3_mid_tight | soft | +0.00 | Outro | contact sheet: PRESENT drops into the grid |
 | 28 | 00:00:08:10 | micro | A4_soft | soft | +0.00 | Outro | contact sheet: TRAIN drops into the grid |
 | 29 | 00:00:08:12 | micro | A5_soft_dull | soft | +0.00 | Outro | contact sheet: RUN drops into the grid |

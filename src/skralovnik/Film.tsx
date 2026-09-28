@@ -1,19 +1,18 @@
-// The SKRALOVNIK film, v2: the day in its own colour, analysed in bursts. The footage stays clean
-// for about 60 % of every shot; the edit (scans, results, strips, flashes) arrives over it in
-// black and white. Base looks (Plate) take the frame; overlays draw on top in a fixed order;
-// the HUD is last.
+// The SKRALOVNIK film, v3: the day in its own colour, analysed in bursts. The footage stays clean
+// for most of every shot; the edit (scans, results, strips, flashes) arrives over it, in white.
+// Base looks (Plate) take the frame; overlays draw on top in a fixed order; the HUD is last.
 import { AbsoluteFill, useCurrentFrame } from 'remotion';
 import { Wipe } from './Chrome';
 import { Fonts } from './Fonts';
 import { Hud } from './Hud';
 import { Outro } from './Outro';
 import { Plate, Strips, SvgDefs } from './Plate';
-import { Element, Scan } from './Scan';
+import { Element, OrbitScan, Ring, Scan } from './Scan';
 import { Boot, Contour, Strip } from './Textures';
 import { eventsAt, FOOT_END, isBase, lookAt, OverLook } from './timeline';
 import { INK } from './tokens';
 
-const ORDER: OverLook[] = ['boot', 'strips', 'strip', 'contour', 'scan', 'element', 'wipe'];
+const ORDER: OverLook[] = ['boot', 'strips', 'strip', 'ring', 'contour', 'scan', 'orbit', 'element', 'wipe'];
 
 export const Film: React.FC = () => {
   const o = useCurrentFrame();
@@ -38,6 +37,10 @@ export const Film: React.FC = () => {
               return <Contour key={e.id} o={o} ev={e} />;
             case 'scan':
               return <Scan key={e.id} o={o} ev={e} />;
+            case 'orbit':
+              return <OrbitScan key={e.id} o={o} ev={e} />;
+            case 'ring':
+              return <Ring key={e.id} o={o} ev={e} />;
             case 'element':
               return <Element key={e.id} o={o} ev={e} />;
             case 'wipe':

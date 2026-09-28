@@ -18,9 +18,9 @@ Level match: every variant at -20 LUFS momentary, then trimmed -8.52 dB so the l
 | C3_long | 520 ms | -28.5 LUFS | -18.25 dBFS | -16.66 dBTP | 0.0e+00 / 0.0e+00 | -109 dBFS | 1.3e-10 | 0.943 | -0.13 dB |
 | C4_swell | 160 ms | -28.5 LUFS | -9.56 dBFS | -9.41 dBTP | 0.0e+00 / 0.0e+00 | -36 dBFS | 1.2e-06 | 0.969 | -0.07 dB |
 | audition reel | 9700 ms | -28.5 LUFS | -1.87 dBFS | -1.20 dBTP | 0.0e+00 / 0.0e+00 | -240 dBFS | 2.5e-06 | 0.987 | -0.03 dB |
-| film soundtrack | 10100 ms | -22.3 LUFS | -2.82 dBFS | -1.00 dBTP | 0.0e+00 / 0.0e+00 | -240 dBFS | 4.0e-06 | 0.978 | -0.05 dB |
+| film soundtrack | 10100 ms | -22.3 LUFS | -2.82 dBFS | -1.00 dBTP | 0.0e+00 / 0.0e+00 | -240 dBFS | 4.0e-06 | 0.979 | -0.05 dB |
 
-Film soundtrack integrated loudness: -27.6 LUFS (sparse, mostly soft transients).
+Film soundtrack integrated loudness: -27.5 LUFS (sparse, mostly soft transients).
 
 - **Clean endings:** every file starts and ends on zero and the last 5 ms sit far below audibility.
 - **Mono compatibility:** A and B are mono sources (L = R). C scatters grains across the field without inter-channel delay, so its mono sum loses only the uncorrelated part and never comb-filters.

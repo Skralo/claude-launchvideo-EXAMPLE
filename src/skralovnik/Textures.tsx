@@ -3,7 +3,7 @@
 import { Dither } from './Bits';
 import { Label } from './Label';
 import { FlatSparkle } from './Sparkle';
-import { CUTS, Ev, H, shotAt, srcAt, TONE, W } from './timeline';
+import { CUTS, Ev, H, shotAt, srcAt, W } from './timeline';
 import { HAIR, INK, PAPER } from './tokens';
 import { contourAt } from './track';
 
@@ -39,13 +39,12 @@ export const Strip: React.FC<{ o: number; ev: Ev }> = ({ o, ev }) => {
 export const Contour: React.FC<{ o: number; ev: Ev }> = ({ o, ev }) => {
   const i = o - ev.o;
   const t = Math.min(1, (i + 1) / (ev.dur - 1));
-  const paper = TONE[ev.shot] === 'paper';
-  const c = paper ? PAPER : INK;
+  const c = PAPER;
   const cs = contourAt(o);
   const pts = cs.reduce((n, p) => n + p.length / 2, 0);
   const first = cs[0];
   return (
-    <div style={{ position: 'absolute', inset: 0, filter: paper ? 'drop-shadow(0 0 3px rgba(5,6,7,0.6))' : 'drop-shadow(0 0 3px rgba(244,241,234,0.7))' }}>
+    <div style={{ position: 'absolute', inset: 0, filter: 'drop-shadow(0 0 3px rgba(5,6,7,0.65))' }}>
       <svg width={W} height={H} style={{ position: 'absolute', left: 0, top: 0 }}>
         {cs.map((p, j) => {
           const d = p.reduce((s, v, q) => s + (q % 2 === 0 ? `${q === 0 ? 'M' : 'L'}${v} ` : `${v} `), '') + 'Z';
@@ -63,7 +62,7 @@ export const Contour: React.FC<{ o: number; ev: Ev }> = ({ o, ev }) => {
           );
         })}
       </svg>
-      {first && <Label x={Math.min(1560, first[0] + 26)} y={Math.max(110, first[1] - 40)} color={c}>{`[CONTOUR] ${pts} PTS`}</Label>}
+      {first && <Label x={Math.min(1560, first[0] + 26)} y={Math.max(110, first[1] - 40)} color={c} shadow="0 1px 5px rgba(5,6,7,0.75)">{`[CONTOUR] ${pts} PTS`}</Label>}
     </div>
   );
 };
