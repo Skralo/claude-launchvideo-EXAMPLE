@@ -1,26 +1,49 @@
-# SKRALOVNIK film: naslednji koraki (stanje 27. 9. 2026)
+# SKRALOVNIK film: naslednji koraki (posodobljeno 28. 9. 2026)
 
 v1 je končan in pushan na `claude/great-pascal-hvqe4s`:
 - `video/skralovnik-v1.mp4` (master)
 - `video/skralovnik-v1-web.mp4` (8 Mb/s)
 - SFX krog 1 v `sfx/skralovnik/`
 
-Nadaljujeva jutri.
+Feedback na v1 je zbran (spodaj). Sledi SFX krog 2 in v2 slika po tvojih overlay referencah.
 
-## 1. SFX krog 1: čaka na tvoje mnenje (po SFX promptu)
-Za vsak prototip: deluje / ne deluje + **zakaj**. Variacij ne delam, dokler tega ni.
-- **A SHUTTER** (micro-cut, transition): deluje / premehak / preoster / napačen karakter
-- **B LOCK** (object lock, resolve): deluje / premalo zaklepa / preveč digitalen / napačen karakter
-- **C GRAIN** (texture movement): deluje / preveč šumi / premalo se sliši / napačen karakter
+## Kako sprašujem
+Ob vsakem začetku seje najprej vprašam s pop-up anketo. Vprašanja so obširna, vsako razložim po domače, pri vsakem odgovoru pa napišem, kaj bo spremenil.
 
-Iz odgovorov: popravim prototipe, šele potem naredim variacije (npr. več različic za micro-cut, da se v rafalu na koncu ne ponavlja isti vzorec).
+## 1. SFX feedback krog 1 (28. 9.)
+- **A SHUTTER:** deluje, "kul je". Naj se **manjkrat ponovi**.
+- **B LOCK:** deluje, obdrži. Dodaj **več dinamike: kovina, metal, vzmet**.
+- **C GRAIN:** deluje.
+- **Celota:**
+  - malo preveč zvokov;
+  - vzorec se ponavlja skozi video in to moti;
+  - **vsaka scena naj ima drugačen vzorec**, usklajen s sliko;
+  - manj zvokov, **večinoma mehki**, le **par močnejših**.
 
-## 2. Vizual v1: odločitve
-- **Tempo:** še hitreje (bližje X referenci, več 1–3 sličičnih vložkov na kader) ali bolj umirjeno?
-  - Meja pri hitrejšem tempu: največ 3 bliski na sekundo (WCAG 2.3.1). Zdaj so 2.
-- **Simbol na koncu:** 3D krom (zdaj) ali ploščat bel z zamikom kot na spletni strani?
-- **Barva:** ostane č/b z rdečo savno kot edinim poudarkom, ali več originalnih barv?
-- **Tvoji komentarji** na posamezne trenutke (timecode + kaj spremeniti).
+SFX krog 2 (variacije, ker je feedback zdaj dan):
+- A: družina različic, nikoli dvakrat zapored ista.
+- B: z bolj kovinsko/vzmetno mehaniko, po mehkosti razdeljen v različice.
+- C: različice po dolžini.
+- Pravila redčenja: manj dogodkov, hierarhija mehko/močno, vzorec po sceni.
+
+## 2. Vizual feedback krog 1 (28. 9.): v2 smer
+- **Kader ostane tak, kot je:**
+  - originalna **barva** in originalna **hitrost** videa;
+  - **brez približevanja** (punch-in gre ven).
+- **Edit je overlay čez kader**, nadgradnja v "Iron Man / Jarvis" stilu, **črno-bel**, HUD iz **minimalnih črt**.
+- **Smejo prekriti cel kader za 1–2 sličici:**
+  - negativ / color invert;
+  - velik napis **čez** premikajoč kader;
+  - krom iskrica na rezu;
+  - 1-bit pikasti kader.
+- **Vse ostalo je samo overlay:**
+  - črni IG/SYS okvirji postanejo paneli čez kader;
+  - krom zvezda na črnem postane krom čez kader;
+  - bel papir z napisom postane napis čez kader;
+  - črna sličica ostane samo HUD čez kader.
+- **Konec:** krom iskrice se zaklenejo, nato postanejo **ploščat logo kot na spletni strani** (bel z zamikom).
+- **Oznake:** lahko več, IG stil, a **minimalistične, brez šuma**.
+- **Čakam na tvoje overlay reference** (poslal jih boš), preden gradim v2 sliko.
 
 ## 3. Če video zamenja hero na spletni strani (`Skralo/skralovnik`, branch `website-v1`)
 - Stran že sama prekriva video z logom in poglavji (`CHAPTERS` v `main.js`). Video ju zdaj ima tudi v sliki, zato bi se podvajala.
